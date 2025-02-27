@@ -48,9 +48,9 @@ public class TbUsers extends AuditEntity {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Size(max = 150)
-    @Column(name = "refresh_token", length = 150)
-    private String refreshToken;
+//    @Size(max = 150)
+//    @Column(name = "refresh_token", length = 150)
+//    private String refreshToken;
 
     @NotNull
     @ColumnDefault("0")

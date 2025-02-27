@@ -32,7 +32,6 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
 
-    private final JwtUtil jwtUtil;
     private final SecurityUtil securityUtil;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -47,14 +46,12 @@ public class UserService {
             throw new ServiceException( ServiceMessageType.ALREADY_EXIST );
         }
 
-        /// users : authorities & refresh token
+        /// users : authorities
         List< GrantedAuthority > authorities = securityUtil.getAuthorities( roles );
         List< String > authorityNames = securityUtil.getAuthorityNames( authorities );
-        String refreshToken = jwtUtil.createRefreshToken( dto.getUsername() );
 
         /// new user
         TbUsers newUser = UserMapper.INSTANCE.toEntity( dto );
-        newUser.setRefreshToken( refreshToken );
         newUser.setPassword( passwordEncoder.encode( dto.getPassword() ) );
         newUser.setFailCnt( 0 );
         newUser.setChangedAt( Timestamp.valueOf( LocalDateTime.now() ) );

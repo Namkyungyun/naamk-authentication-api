@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.lettuce.core.RedisException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.co.naamk.naamkauthenticationapi.config.security.exception.SecurityException;
@@ -22,8 +21,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.crypto.SecretKey;
-import javax.security.sasl.AuthenticationException;
 import java.io.IOException;
 import java.util.List;
 
@@ -48,18 +45,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             accessToken = getJwtAccessTokenFromRequest( request );
 
-            // Access Token 검증
             if ( StringUtils.hasText( accessToken ) ) {
+                // Access Token 검증
+                jwtUtil.validateToken( accessToken ); // 만료, 조작된 토큰 -> jwt exception
 
-                SecretKey secretKey = jwtUtil.getSecretKey( true );
-                jwtUtil.validateAccessToken( secretKey, accessToken );
-
-                Claims claims = jwtUtil.getClaimsFromToken( secretKey, accessToken );
+                Claims claims = jwtUtil.getClaimsFromToken( accessToken );
                 username = jwtUtil.getUsernameFromClaim( claims );
                 List< SimpleGrantedAuthority > authorities = jwtUtil.getAuthoritiesFromClaim( claims );
 
-                // Redis에서 검증 (여기까지 왔다는 건 토큰 자체는 아직 만료가 되지 않았다는 것)
-                validateTokenInRedis( username, accessToken ); // RedisException 연결
+                // Redis에서 검증
+                validateTokenInRedis( username, accessToken ); // 없음, 다른값 ->  redis exception
 
                 // 인증 객체 등록
                 UsernamePasswordAuthenticationToken authenticationToken = securityUtil.generateJWTAuthentication( request, username, authorities );
@@ -70,27 +65,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter( request, response );
 
         } catch ( Exception e ) {
-            String message = e.getMessage(); // JWTUtil에서 온거라면 메시지로 ServiceMessageType의 코드값.
+            // JWTUtil에서 온거라면 메시지로 ServiceMessageType의 코드값.
+            String message = e.getMessage();
             log.error( "JwtAuthenticationFilter Error 발생: {}", message );
+
+            ServiceMessageType expirationType = ServiceMessageType.EXPIRED_TOKEN;
+            ServiceMessageType invalidType = ServiceMessageType.INVALID_TOKEN;
+
             if( e instanceof JwtException ) {
-                if(message.contains( ServiceMessageType.EXPIRED_TOKEN.getCode().toString() )) {
-                    // 만료됨.
+                if(message.contains( expirationType.getCode().toString() )) {
+                    // 만료
                     log.error( "❌ Requested AccessToken is Expired" );
-                    exception.unAuthorization( request, response, ServiceMessageType.EXPIRED_TOKEN );
+                    exception.unAuthorization( request, response, expirationType );
                     return;
                 }
 
-                // 재로그인 필요.
-                log.error( "❌ Need to check Redis token value" );
-                exception.unAuthorization( request, response );
+                // 잘못된 token 값.
+                log.error( "❌ Invalid token value" );
+                exception.unAuthorization( request, response, invalidType);
 
 
             } else if( e instanceof RedisException ) {
                 // redis check
-                if(message.contains( ServiceMessageType.EXPIRED_TOKEN.getCode().toString() )) {
+                if(message.contains( expirationType.getCode().toString() )) {
                     // 만료됨.
                     log.error( "❌ Requested AccessToken is Expired" );
-                    exception.unAuthorization( request, response, ServiceMessageType.EXPIRED_TOKEN );
+                    exception.unAuthorization( request, response, expirationType);
                     return;
                 }
 

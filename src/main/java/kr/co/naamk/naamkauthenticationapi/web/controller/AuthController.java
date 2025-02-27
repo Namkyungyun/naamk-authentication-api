@@ -26,15 +26,4 @@ public class AuthController {
                 .entity( result )
                 .build();
     }
-
-    @PostMapping(value = "/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object refresh( HttpServletRequest request, @RequestBody AuthDto.RefreshRequest dto) {
-        AuthDto.RefreshResponse result = authService.refresh( dto );
-
-        return APIResponseEntityBuilder.create()
-                .service( request )
-                .resultMessage( ServiceMessageType.SUCCESS )
-                .entity( result )
-                .build();
-    }
 }

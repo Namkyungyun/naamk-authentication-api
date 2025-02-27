@@ -2,7 +2,6 @@ package kr.co.naamk.naamkauthenticationapi.utils;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -20,20 +19,13 @@ import java.util.List;
 @Component
 public class JwtUtil implements InitializingBean {
 
-    /// refresh
-    @Value("${jwt.refresh-token.sign-key}")
-    private String refreshSecretKey;
-    private SecretKey REFRESH_SECRET_KEY;
-    public static String REFRESH_HEADER = "Authorization-Refresh";
-    public static final long REFRESH_EXPIRATION = 1 * 24 * 60 * 60 * 1000; // 1일
-
     /// access
     @Value("${jwt.access-token.sign-key}")
     private String accessSecretKey;
     private SecretKey ACCESS_SECRET_KEY;
     private final String AUTHORITIES_KEY = "naamk-auth-key";
     public static String ACCESS_HEADER = "Authorization";
-    public static final long ACCESS_EXPIRATION = 1 * 60 * 1000; // 1시간
+    public static final long ACCESS_EXPIRATION = 1 * 1 * 60 * 1000; // hour * minute * second * milli =>  8시간
 
 
     /// 빈이 생성되고 주입을 받은 후에 secret값을 Base64 Decode해서 key 변수에 할당하기 위해
@@ -42,13 +34,6 @@ public class JwtUtil implements InitializingBean {
         // Base64 디코딩
         byte[] accessTokenSecretBytes = Base64.getDecoder().decode( accessSecretKey );
         this.ACCESS_SECRET_KEY = Keys.hmacShaKeyFor( accessTokenSecretBytes );
-
-        byte[] refreshTokenSecretBytes = Base64.getDecoder().decode( refreshSecretKey );
-        this.REFRESH_SECRET_KEY = Keys.hmacShaKeyFor( refreshTokenSecretBytes );
-    }
-
-    public SecretKey getSecretKey(boolean isAccessToken) {
-        return isAccessToken ? ACCESS_SECRET_KEY : REFRESH_SECRET_KEY;
     }
 
     /// Access Token 생성
@@ -64,29 +49,16 @@ public class JwtUtil implements InitializingBean {
                 .compact();
     }
 
-    /// Refresh Token 생성
-    public String createRefreshToken( String username ) {
-        // 1️⃣ JWS 서명된 JWT 생성
-        return Jwts.builder()
-                .header().type( "JWT" ).and()
-                .subject( username )
-                .issuedAt( new Date() )
-                .expiration( getExpirationDate( REFRESH_EXPIRATION ) )
-                .signWith( REFRESH_SECRET_KEY, Jwts.SIG.HS256 ) // ✅ 최신 방식 적용
-                .compact();
-    }
-
-
     ///  검증
-    public void validateAccessToken( SecretKey key, String token ) {
-        getJWS( key, token );
+    public void validateToken( String token ) {
+        getJWS( token );
     }
 
 
     /// Claim 파싱 (권한 정보)
-    public Claims getClaimsFromToken( SecretKey key, String token ) {
+    public Claims getClaimsFromToken( String token ) {
         try {
-            return getJWS( key, token ).getPayload(); // ✅ JWT Payload (Claims) 반환
+            return getJWS( token ).getPayload(); // ✅ JWT Payload (Claims) 반환
         } catch ( Throwable e ) {
             throw new JwtException( "Failed to get JWS payload", e );
         }
@@ -116,10 +88,10 @@ public class JwtUtil implements InitializingBean {
 
 
     /// JWS
-    private Jws< Claims > getJWS( SecretKey key, String token ) {
+    private Jws< Claims > getJWS( String token ) {
         try {
             return Jwts.parser()
-                    .verifyWith( key ) // ✅ 서명 검증 (최신 jjwt 사용 방식)
+                    .verifyWith( ACCESS_SECRET_KEY ) // ✅ 서명 검증 (최신 jjwt 사용 방식)
                     .build()
                     .parseSignedClaims( token ); // ✅ 서명된 JWT 파싱
 

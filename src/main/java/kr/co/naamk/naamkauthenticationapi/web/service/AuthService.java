@@ -104,12 +104,10 @@ public class AuthService implements UserDetailsService {
         /// generate accessToken refreshToken
         List< String > authorityTexts = authorities.stream().map( GrantedAuthority::getAuthority ).toList();
         String accessToken = jwtUtil.createAccessToken( username, authorityTexts );
-        String refreshToken = jwtUtil.createRefreshToken( username );
 
 
         /// db 저장 (유저 정보)
         user.setFailCnt( 0 );
-        user.setRefreshToken( refreshToken );
         user.setChangedAt( Timestamp.valueOf( LocalDateTime.now() ) );
         userRepository.save( user );
 
@@ -124,46 +122,9 @@ public class AuthService implements UserDetailsService {
 
         return AuthDto.LoginResponse.builder()
                 .userId( user.getId() )
-                .refreshToken( refreshToken )
                 .accessToken( accessToken )
                 .build();
     }
-
-
-    /**
-     * refreshToken을 이용해 accessToken을 갱신
-     * 클라이언트에서는 FAIL_REFRESH 코드 값인 '4006'이면 로그인 페이지로 되돌리기.
-     *
-     * @param dto : userId, refreshToken
-     * @return : userId, username, accessToken
-     */
-    public AuthDto.RefreshResponse refresh( AuthDto.RefreshRequest dto ) {
-
-        TbUsers user = userRepository.findById( dto.getUserId() )
-                .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
-
-        if ( !user.getIsActive() ) {
-            throw new ServiceException( ServiceMessageType.FAIL_REFRESH, "비활성화 상태의 유저입니다." );
-        }
-
-        if ( !user.getRefreshToken().equals( dto.getRefreshToken() ) ) {
-            throw new ServiceException( ServiceMessageType.FAIL_REFRESH, "잘못된 리프레시값 입니다." );
-        }
-
-        List< GrantedAuthority > authorities = getAuthorities( user.getId() );
-        List< String > authorityTexts = authorities.stream().map( GrantedAuthority::getAuthority ).toList();
-        String accessToken = jwtUtil.createAccessToken( user.getUsername(), authorityTexts );
-
-        saveAccessToken(user.getUsername(), accessToken);
-
-
-        return AuthDto.RefreshResponse.builder()
-                .userId( user.getId() )
-                .username( user.getUsername() )
-                .accessToken( accessToken )
-                .build();
-    }
-
 
     /**
      * DB의 역할에 조회하여 List<GrantedAuthority> 만들어 반환
@@ -193,5 +154,4 @@ public class AuthService implements UserDetailsService {
                         .timeToLive( JwtUtil.ACCESS_EXPIRATION )
                         .build() );
     }
-
 }

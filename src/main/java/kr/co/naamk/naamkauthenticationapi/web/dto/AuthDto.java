@@ -18,14 +18,12 @@ public class AuthDto {
     public static class LoginResponse {
         private Integer userId;
         private String accessToken;
-        private String refreshToken;
     }
 
     @Setter @Getter
     @AllArgsConstructor @NoArgsConstructor
     public static class RefreshRequest {
         private Integer userId;
-        private String refreshToken;
     }
 
     @Data

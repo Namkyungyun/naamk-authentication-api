@@ -32,8 +32,6 @@ spring:
 jwt: # 64byte
   access-token:
     sign-key: uxsZKT3i0IhLnk3WCsvgN7kiw8DLhfWohRKLTXPRTGo= # HMAC ?? ? (Base64 ???? ?)
-  refresh-token:
-    sign-key: uxsZKT3i0IhLnk3WCsvgN7kiw8DLhfWohRKLTXPRTGo= # HMAC ?? ? (Base64 ???? ?)
 
 #logging:
 #  level:
