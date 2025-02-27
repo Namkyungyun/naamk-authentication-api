@@ -1,0 +1,46 @@
+server:
+  port: 38080
+  shutdown: graceful
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+spring:
+  profiles:
+    active: local
+  application:
+    name: naamk-admin-api
+  config:
+    import:
+      - classpath:${spring.profiles.active}/dataSource.yml
+      - classpath:${spring.profiles.active}/jasypt.yml
+      - classpath:${spring.profiles.active}/redis.yml
+  main:
+    allow-bean-definition-overriding: true
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        enabled_lay_load_no_trans: false
+        jdbc:
+          time-zone: Asia/Seoul
+    show-sql: true
+
+
+jwt: # 64byte
+  access-token:
+    sign-key: uxsZKT3i0IhLnk3WCsvgN7kiw8DLhfWohRKLTXPRTGo= # HMAC ?? ? (Base64 ???? ?)
+  refresh-token:
+    sign-key: uxsZKT3i0IhLnk3WCsvgN7kiw8DLhfWohRKLTXPRTGo= # HMAC ?? ? (Base64 ???? ?)
+
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        transaction:
+#          interceptor:  trace
+
+
+

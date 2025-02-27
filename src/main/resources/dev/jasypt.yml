@@ -1,0 +1,8 @@
+# Jasypt Config
+jasypt:
+  encryptor:
+    bean: jasyptEncryptorAES
+    password: naamk-password
+    property:
+      prefix: ENC(
+      suffix: )
