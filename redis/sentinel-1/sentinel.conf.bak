@@ -1,0 +1,28 @@
+port 26379
+
+dir "/etc/redis"
+
+# 호스트네임 자동 해석 활성화
+# sentinel resolve-hostnames yes
+
+# 호스트네임 설정
+# sentinel announce-ip sentinel-2
+
+# Sentinel이 호스트네임으로 자신을 알림
+# sentinel announce-hostnames yes
+
+# 감시할 Master 서버 설정 (마스터 컨테이너 이름 homstname  포트)
+sentinel monitor mymaster 127.0.0.1 6379 2
+
+# Sentinel이 마스터 장애를 판단하는 시간 (ms)
+sentinel down-after-milliseconds mymaster 10000
+
+# Master 장애 발생 시 Failover 실행 시간 (ms)
+sentinel failover-timeout mymaster 10000
+
+# Failover 시 병렬 동기화할 Slave 개수
+sentinel parallel-syncs mymaster 1
+
+# Master 인증 (Sentinel이 Master에 접근할 때 사용할 비밀번호)
+sentinel auth-pass mymaster naamkadmin
+
