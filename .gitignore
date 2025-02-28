@@ -7,6 +7,7 @@ build/
 !**/postgreDB/**/docker-compose.yml
 !**/redis/**/*.conf
 !**/redis/**/*.conf.bak
+!**/src/main/generated/
 !**/redis/**/docker-compose.yml
 
 ### STS ###
@@ -17,6 +18,7 @@ build/
 .settings
 .springBeans
 .sts4-cache
+.DS_Store
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
@@ -29,6 +31,7 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+
 
 ### NetBeans ###
 /nbproject/private/

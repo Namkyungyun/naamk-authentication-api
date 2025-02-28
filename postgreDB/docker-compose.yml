@@ -1,0 +1,13 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:bullseye
+    restart: always
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - "25432:5432"
+    environment:
+      POSTGRES_USER: dev_poplus
+      POSTGRES_PASSWORD: Das%3bv-Bp15Z
+      POSTGRES_DB: web3
