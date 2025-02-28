@@ -48,9 +48,6 @@ public class TbUsers extends AuditEntity {
     @Column(name = "email", nullable = false)
     private String email;
 
-//    @Size(max = 150)
-//    @Column(name = "refresh_token", length = 150)
-//    private String refreshToken;
 
     @NotNull
     @ColumnDefault("0")
@@ -58,9 +55,9 @@ public class TbUsers extends AuditEntity {
     private Integer failCnt;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     @Column(name = "changed_at")
     @Comment("로그인일자")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private Timestamp changedAt;
 
     @NotNull

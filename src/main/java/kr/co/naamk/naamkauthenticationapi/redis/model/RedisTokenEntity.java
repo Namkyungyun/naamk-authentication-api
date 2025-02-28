@@ -13,10 +13,10 @@ import java.util.concurrent.TimeUnit;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@RedisHash(value="refresh_token")
+@RedisHash(value="access_token")
 public class RedisTokenEntity {
     @Id
-    private String userId; // refresh_token:${userId}
+    private String userId; // access_token:${userId}
 
     @Indexed
     private String accessToken;

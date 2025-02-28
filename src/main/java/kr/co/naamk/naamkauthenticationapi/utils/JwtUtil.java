@@ -25,7 +25,7 @@ public class JwtUtil implements InitializingBean {
     private SecretKey ACCESS_SECRET_KEY;
     private final String AUTHORITIES_KEY = "naamk-auth-key";
     public static String ACCESS_HEADER = "Authorization";
-    public static final long ACCESS_EXPIRATION = 1 * 1 * 60 * 1000; // hour * minute * second * milli =>  8시간
+    public static final long ACCESS_EXPIRATION = 8 * 60 * 60 * 1000; // hour * minute * second * milli =>  8시간
 
 
     /// 빈이 생성되고 주입을 받은 후에 secret값을 Base64 Decode해서 key 변수에 할당하기 위해

@@ -62,7 +62,7 @@ public class SpringSecurityConfig {
         );
 
         http.authorizeHttpRequests( req -> req
-                .requestMatchers( "api/v1/login", "api/v1/refresh" ).permitAll()
+                .requestMatchers( "api/v1/login", "api/v1/auth/**", "api/v1/roles/**" ).permitAll()
                 .anyRequest().authenticated()
         );
 
