@@ -9,7 +9,7 @@ build/
 !**/redis/**/*.conf.bak
 !**/src/main/generated/
 !**/redis/**/docker-compose.yml
-**/postgreDB/data
+**/postgreDB/data/
 
 ### STS ###
 .apt_generated
