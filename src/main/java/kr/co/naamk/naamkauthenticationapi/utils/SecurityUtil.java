@@ -3,12 +3,14 @@ package kr.co.naamk.naamkauthenticationapi.utils;
 import jakarta.servlet.http.HttpServletRequest;
 import kr.co.naamk.naamkauthenticationapi.domain.TbRoles;
 import lombok.RequiredArgsConstructor;
+import org.mapstruct.ap.shaded.freemarker.template.utility.SecurityUtilities;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -59,5 +61,16 @@ public class SecurityUtil {
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         return authentication;
+    }
+
+
+    /// context holder 저장값
+    public Authentication getAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
+
+    /// context holder 비우기
+    public void clearContextHolder() {
+        SecurityContextHolder.clearContext();
     }
 }

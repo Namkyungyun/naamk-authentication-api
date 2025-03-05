@@ -33,7 +33,7 @@ public class TbMenus extends AuditEntity {
     private String name;
 
     @Size(max = 50)
-    @Column(name = "desc", length = 50)
+    @Column(name = "\"desc\"", length = 50)
     @Comment( "메뉴 설명" )
     private String desc;
 
@@ -42,8 +42,12 @@ public class TbMenus extends AuditEntity {
     @Comment("상위 메뉴 ID")
     private Integer parentId;
 
+    @Column(name="url", length = 50)
+    @Comment( "메뉴 url" )
+    private String url;
+
     @NotNull
-    @Column(name="order", nullable = false)
+    @Column(name="\"order\"", nullable = false)
     @Comment("메뉴 정렬 순서 번호")
     private Integer order;
 

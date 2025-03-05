@@ -26,10 +26,12 @@ public class MenuDto {
         private String url;
     }
 
+
     @AllArgsConstructor @NoArgsConstructor
     @Getter @Setter
     @Builder
     public static class UpdateRequest {
+        private Integer id;
         private String name;
         private String desc;
         private Integer order;

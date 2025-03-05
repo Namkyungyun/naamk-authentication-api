@@ -40,7 +40,7 @@ public class APIExceptionHandler {
         errorLog(e.getClass().getSimpleName(), rootCause.getMessage());
 
         return APIResponseEntityBuilder.create().service(request)
-                .resultMessage( ServiceMessageType.ERROR_SQL, e.getMessage())
+                .resultMessage( ServiceMessageType.ERROR_SQL, rootCause.getMessage())
                 .build();
     }
 

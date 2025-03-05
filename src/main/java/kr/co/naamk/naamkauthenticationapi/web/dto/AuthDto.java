@@ -20,6 +20,14 @@ public class AuthDto {
         private String accessToken;
     }
 
+    @AllArgsConstructor @NoArgsConstructor
+    @Setter @Getter
+    @Builder
+    public static class ActiveRequest {
+        private Integer id;
+        private Boolean isActive;
+    }
+
     @Setter @Getter
     @AllArgsConstructor @NoArgsConstructor
     public static class RefreshRequest {

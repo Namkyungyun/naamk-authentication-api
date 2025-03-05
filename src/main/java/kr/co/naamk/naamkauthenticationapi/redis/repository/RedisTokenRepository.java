@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RedisTokenRepository extends CrudRepository< RedisTokenEntity, String > {
-    RedisTokenEntity findByUserId( String userId);
+    RedisTokenEntity findByUsername( String username);
 }

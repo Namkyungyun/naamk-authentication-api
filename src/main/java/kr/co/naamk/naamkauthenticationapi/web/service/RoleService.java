@@ -8,6 +8,7 @@ import kr.co.naamk.naamkauthenticationapi.domain.type.Perms;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
 import kr.co.naamk.naamkauthenticationapi.mapstruct.RoleMapper;
+import kr.co.naamk.naamkauthenticationapi.web.dto.AuthDto;
 import kr.co.naamk.naamkauthenticationapi.web.dto.RoleDto;
 import kr.co.naamk.naamkauthenticationapi.web.repository.MenuRepository;
 import kr.co.naamk.naamkauthenticationapi.web.repository.RoleMenusRepository;
@@ -72,48 +73,87 @@ public class RoleService {
         return RoleMapper.INSTANCE.toDto( newRole );
     }
 
+
     @Transactional
-    public Boolean updateRoleAuthorities( RoleDto.AuthorityRequest dto ) {
-        List< RoleDto.ActiveRequest > requestPerms = dto.getPerms();
-        List< RoleDto.ActiveRequest > requestMenus = dto.getMenus();
+    public RoleDto updateRole( RoleDto.UpdateRequest dto ) {
+        TbRoles role = roleRepository.findById( dto.getId() )
+                .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND ) );
+
+        role.setDesc( dto.getDesc() );
+        role.setIsActive( dto.getIsActive() );
+
+        TbRoles entity = roleRepository.save( role );
+
+        return RoleMapper.INSTANCE.toDto( entity );
+    }
+
+    @Transactional
+    public RoleDto.AccessResponse updateRoleAccess( RoleDto.AccessRequest dto ) {
+        RoleDto.AccessResponse result = RoleDto.AccessResponse.builder().build();
+
+        /// role check
+        TbRoles role = roleRepository.findById( dto.getRoleId() )
+                .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND ) );
+
+        /// request arr check
+        List< AuthDto.ActiveRequest > requestPerms = dto.getPerms().stream().toList();
+        List< AuthDto.ActiveRequest > requestMenus = dto.getMenus();
 
         if ( requestPerms.isEmpty() && requestMenus.isEmpty() ) {
-            throw new ServiceException( ServiceMessageType.EMPTY_REQUEST );
+            throw new ServiceException( ServiceMessageType.EMPTY_REQUEST, "all requested parameters are empty." );
         }
 
         /// perms
         if ( !requestPerms.isEmpty() ) {
-            List< TbRolePerms > permEntities = new ArrayList<>();
+            List< TbRolePerms> entities = rolePermsRepository.findByRole( role );
+            List<Integer> ids = entities.stream().map( TbRolePerms::getId ).toList();
 
-            for ( RoleDto.ActiveRequest requestPerm : requestPerms ) {
-                String permErrorMsg = "A non-existent rolePermId exists. : " + requestPerm.getId();
-
-                TbRolePerms entity = rolePermsRepository.findById( requestPerm.getId() )
-                        .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, permErrorMsg ) );
-                entity.setIsActive( requestPerm.getIsActive() );
-
-                permEntities.add( entity );
+            for ( AuthDto.ActiveRequest request : requestPerms ) {
+                boolean contains = ids.contains( request.getId() );
+                if ( contains ) {
+                    int index = ids.indexOf( request.getId() );
+                    TbRolePerms tbRolePerms = entities.get( index );
+                    tbRolePerms.setIsActive( request.getIsActive() );
+                }
             }
-            rolePermsRepository.saveAll( permEntities );
+
+            List< RoleDto.RolePermResponse > savedList = rolePermsRepository.saveAll( entities ).stream()
+                    .map( el -> RoleDto.RolePermResponse.builder()
+                            .id( el.getId() )
+                            .permCd( el.getPermCd() )
+                            .isActive( el.getIsActive() )
+                            .build() )
+                    .toList();
+
+            result.setPerms( savedList );
         }
 
         /// menus
         if ( !requestMenus.isEmpty() ) {
-            List< TbRoleMenus > menuEntities = new ArrayList<>();
+            List< TbRoleMenus> entities = roleMenusRepository.findByRole( role );
+            List<Integer> ids = entities.stream().map( TbRoleMenus::getId ).toList();
 
-            for ( RoleDto.ActiveRequest requestMenu : requestMenus ) {
-                String permErrorMsg = "A non-existent roleMenuId exists. : " + requestMenu.getId();
-
-                TbRoleMenus entity = roleMenusRepository.findById( requestMenu.getId() )
-                        .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, permErrorMsg ) );
-                entity.setIsActive( requestMenu.getIsActive() );
-
-                menuEntities.add( entity );
+            for ( AuthDto.ActiveRequest request : requestMenus ) {
+                boolean contains = ids.contains( request.getId() );
+                if ( contains ) {
+                    int index = ids.indexOf( request.getId() );
+                    TbRoleMenus tbRoleMenus = entities.get( index );
+                    tbRoleMenus.setIsActive( request.getIsActive() );
+                }
             }
-            roleMenusRepository.saveAll( menuEntities );
+
+            List< RoleDto.RoleMenuResponse > savedList = roleMenusRepository.saveAll( entities ).stream()
+                    .map( el -> RoleDto.RoleMenuResponse.builder()
+                            .id( el.getId() )
+                            .menuCd( el.getMenu().getCode() )
+                            .isActive( el.getIsActive() )
+                            .build()
+                    ).toList();
+
+           result.setMenus( savedList );
         }
 
-        return true;
+        return result;
     }
 
 }

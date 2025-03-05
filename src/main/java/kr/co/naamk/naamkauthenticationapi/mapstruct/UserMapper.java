@@ -6,12 +6,17 @@ import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
+import java.sql.Timestamp;
+import java.util.List;
+
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, unmappedSourcePolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
     UserMapper INSTANCE = Mappers.getMapper( UserMapper.class );
 
-    TbUsers toEntity(UserDto.CreateRequest dto);
+    TbUsers ToEntity( UserDto.CreateRequest dto);
+
+    UserDto toDto( TbUsers entity, Timestamp expiredDate, List<String> authorities);
 
 
 

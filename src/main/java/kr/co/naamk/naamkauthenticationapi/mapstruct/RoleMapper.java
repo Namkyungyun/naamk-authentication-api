@@ -1,5 +1,6 @@
 package kr.co.naamk.naamkauthenticationapi.mapstruct;
 
+import kr.co.naamk.naamkauthenticationapi.domain.TbRolePerms;
 import kr.co.naamk.naamkauthenticationapi.domain.TbRoles;
 import kr.co.naamk.naamkauthenticationapi.web.dto.RoleDto;
 import org.mapstruct.Mapper;
@@ -14,5 +15,4 @@ public interface RoleMapper {
     TbRoles createDtoToEntity( RoleDto.CreateRequest dto );
 
     RoleDto toDto( TbRoles role );
-
 }

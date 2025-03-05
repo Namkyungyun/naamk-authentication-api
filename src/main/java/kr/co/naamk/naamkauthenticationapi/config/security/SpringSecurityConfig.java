@@ -58,12 +58,13 @@ public class SpringSecurityConfig {
         http.exceptionHandling( handler
                 -> handler
                 .authenticationEntryPoint( ( request, response, authException ) -> securityException.unAuthorization( request, response ) ) // 401
-                .accessDeniedHandler( (request, response, authException ) -> securityException.unAuthentication( request, response ) ) // 403
+                .accessDeniedHandler( ( request, response, authException ) -> securityException.unAuthentication( request, response ) ) // 403
         );
 
         http.authorizeHttpRequests( req -> req
-                .requestMatchers( "api/v1/login", "api/v1/auth/**", "api/v1/roles/**" ).permitAll()
-                .anyRequest().authenticated()
+//                .requestMatchers( "api/v1/login", "api/v1/auth/**" ).permitAll()
+                        .anyRequest().permitAll()
+//                .anyRequest().authenticated()
         );
 
         // filter

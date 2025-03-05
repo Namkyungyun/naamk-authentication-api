@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -36,12 +37,14 @@ public class MenuService {
         }
 
         /// save menu
-        long menusCnt = menuRepository.count();
+        int menusCnt = (int) menuRepository.count();
 
         TbMenus entity = MenuMapper.INSTANCE.createDtoToEntity( dto );
-        entity.setOrder( (int) ( menusCnt ) + 1 );
+        entity.setOrder( menusCnt + 1 );
         entity.setIsActive( false );
+        entity.setUrl( dto.getUrl() );
         TbMenus newMenu = menuRepository.save( entity );
+
 
         /// save RoleMenu
         List< TbRoleMenus > roleMenus = new ArrayList<>();
@@ -50,9 +53,11 @@ public class MenuService {
             TbRoleMenus roleMenu = new TbRoleMenus();
             roleMenu.setRole( role );
             roleMenu.setMenu( newMenu );
+            roleMenu.setIsActive( false );
 
             roleMenus.add( roleMenu );
         }
+
         roleMenusRepository.saveAll( roleMenus );
 
         return MenuMapper.INSTANCE.toDto( newMenu );
@@ -60,27 +65,46 @@ public class MenuService {
 
 
     @Transactional
-    public Boolean updateMenu( Integer id, MenuDto.UpdateRequest dto ) {
-
+    public MenuDto updateMenu( MenuDto.UpdateRequest dto ) {
         /// checking menu
-        if ( !menuRepository.existsById( id ) ) {
-            throw new ServiceException( ServiceMessageType.NOT_FOUND, "The request id does not exist" );
+        TbMenus entity = menuRepository.findById( dto.getId() )
+                .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "The requested id is not exist" ) );
+
+        List< TbMenus > sameLevelList = menuRepository.findAllByParentIdOrderByOrder( entity.getParentId() );
+        if(dto.getOrder() > sameLevelList.size()) {
+            dto.setOrder( sameLevelList.size() );
         }
+
+        boolean isOrderReArrange = !entity.getOrder().equals( dto.getOrder() );
 
 
         /// update menus (consider re-order)
-        TbMenus entity = MenuMapper.INSTANCE.updateDtoToEntity( dto );
-        entity.setId( id );
+        entity.setName( dto.getName() );
+        entity.setDesc( dto.getDesc() );
+        entity.setOrder( dto.getOrder() );
+        entity.setParentId( dto.getParentId() );
+        entity.setIsActive( dto.getIsActive() );
+        entity.setUrl( dto.getUrl() );
+
 
         /// 기존 메뉴 리스트에서 변경된 순서를 반영
-        List< TbMenus > sameLevelList = menuRepository.findAllByParentIdOrderByOrder( dto.getParentId() );
-        sameLevelList.stream()
-                .filter( menu -> menu.getOrder() >= dto.getOrder() ) // 순서가 dto.getOrder() 이상인 메뉴들만 재정렬
-                .forEach( menu -> menu.setOrder( menu.getOrder() + 1 ) );
+        if ( isOrderReArrange ) {
+            int orderNo = 1;
+            sameLevelList.removeIf( el -> el.getId().equals( entity.getId() ) );
+            sameLevelList.add(entity.getOrder()-1, entity);
 
-        menuRepository.saveAll( sameLevelList );
+            for(TbMenus menu : sameLevelList) {
+                menu.setOrder( orderNo );
+                orderNo++;
+            }
 
-        return true;
+            menuRepository.saveAll( sameLevelList );
+
+        } else {
+            menuRepository.save( entity );
+        }
+
+        return MenuMapper.INSTANCE.toDto( entity );
     }
 
 
@@ -91,7 +115,7 @@ public class MenuService {
      * @return
      */
     @Transactional
-    public Boolean deleteMenu( Integer id ) {
+    public Map<String, Boolean> deleteMenu( Integer id ) {
 
         /// checking menu
         TbMenus entity = menuRepository.findById( id )
@@ -100,16 +124,18 @@ public class MenuService {
 
         /// update menus (consider re-order)
         List< TbMenus > sameLevelList = menuRepository.findAllByParentIdOrderByOrder( entity.getParentId() );
-        sameLevelList.stream()
-                .filter( menu -> menu.getOrder() >= entity.getOrder() ) // 순서가 dto.getOrder() 이상인 메뉴들만 재정렬
-                .forEach( menu -> menu.setOrder( menu.getOrder() - 1 ) );
+        sameLevelList.removeIf( el -> el.getId().equals( entity.getId() ) );
+
+        int orderNo = 1;
+        for(TbMenus menu : sameLevelList) {
+            menu.setOrder( orderNo );
+            orderNo++;
+        }
+
+        menuRepository.deleteById( id );
         menuRepository.saveAll( sameLevelList );
 
-
-        /// delete
-        menuRepository.deleteById( id );
-
-        return true;
+        return Map.of("result", true);
     }
 
 

@@ -1,5 +1,7 @@
 package kr.co.naamk.naamkauthenticationapi.mapstruct;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.processing.Generated;
 import kr.co.naamk.naamkauthenticationapi.domain.TbMenus;
 import kr.co.naamk.naamkauthenticationapi.web.dto.MenuDto;
@@ -23,6 +25,7 @@ public class MenuMapperImpl implements MenuMapper {
         tbMenus.setName( dto.getName() );
         tbMenus.setDesc( dto.getDesc() );
         tbMenus.setParentId( dto.getParentId() );
+        tbMenus.setUrl( dto.getUrl() );
 
         return tbMenus;
     }
@@ -35,9 +38,11 @@ public class MenuMapperImpl implements MenuMapper {
 
         TbMenus tbMenus = new TbMenus();
 
+        tbMenus.setId( dto.getId() );
         tbMenus.setName( dto.getName() );
         tbMenus.setDesc( dto.getDesc() );
         tbMenus.setParentId( dto.getParentId() );
+        tbMenus.setUrl( dto.getUrl() );
         tbMenus.setOrder( dto.getOrder() );
         tbMenus.setIsActive( dto.getIsActive() );
 
@@ -45,21 +50,36 @@ public class MenuMapperImpl implements MenuMapper {
     }
 
     @Override
-    public MenuDto toDto(TbMenus role) {
-        if ( role == null ) {
+    public MenuDto toDto(TbMenus entity) {
+        if ( entity == null ) {
             return null;
         }
 
         MenuDto.MenuDtoBuilder menuDto = MenuDto.builder();
 
-        menuDto.id( role.getId() );
-        menuDto.code( role.getCode() );
-        menuDto.name( role.getName() );
-        menuDto.desc( role.getDesc() );
-        menuDto.parentId( role.getParentId() );
-        menuDto.order( role.getOrder() );
-        menuDto.isActive( role.getIsActive() );
+        menuDto.id( entity.getId() );
+        menuDto.code( entity.getCode() );
+        menuDto.name( entity.getName() );
+        menuDto.desc( entity.getDesc() );
+        menuDto.parentId( entity.getParentId() );
+        menuDto.order( entity.getOrder() );
+        menuDto.isActive( entity.getIsActive() );
+        menuDto.url( entity.getUrl() );
 
         return menuDto.build();
+    }
+
+    @Override
+    public List<MenuDto> toDtoList(List<TbMenus> entities) {
+        if ( entities == null ) {
+            return null;
+        }
+
+        List<MenuDto> list = new ArrayList<MenuDto>( entities.size() );
+        for ( TbMenus tbMenus : entities ) {
+            list.add( toDto( tbMenus ) );
+        }
+
+        return list;
     }
 }

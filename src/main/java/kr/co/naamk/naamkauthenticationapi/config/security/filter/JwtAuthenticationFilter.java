@@ -117,7 +117,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throw new RedisException(ServiceMessageType.INVALID_TOKEN.getCode().toString());
         }
 
-        RedisTokenEntity accessTokenEntity = redisTokenRepository.findByUserId( username );
+        RedisTokenEntity accessTokenEntity = redisTokenRepository.findByUsername( username );
         if( accessTokenEntity == null ) {
             log.error( "❌ Not Found Access Token in Redis" );
             throw new RedisException(ServiceMessageType.EXPIRED_TOKEN.getCode().toString());

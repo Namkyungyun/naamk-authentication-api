@@ -69,6 +69,8 @@ dependencies {
 
     // utils
     implementation 'org.apache.commons:commons-lang3:3.12.0' // 최신 버전을 사용
+    implementation 'org.apache.commons:commons-collections4:4.4'
+
 
     // security
     implementation 'org.springframework.boot:spring-boot-starter-security'

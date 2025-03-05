@@ -1,5 +1,6 @@
 package kr.co.naamk.naamkauthenticationapi.web.service;
 
+import kr.co.naamk.naamkauthenticationapi.config.security.exception.SecurityException;
 import kr.co.naamk.naamkauthenticationapi.domain.*;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
@@ -11,8 +12,6 @@ import kr.co.naamk.naamkauthenticationapi.utils.JwtUtil;
 import kr.co.naamk.naamkauthenticationapi.utils.SecurityUtil;
 import kr.co.naamk.naamkauthenticationapi.web.dto.AuthDto;
 import kr.co.naamk.naamkauthenticationapi.web.repository.*;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,15 +20,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
@@ -51,6 +50,7 @@ public class AuthService implements UserDetailsService {
     private final RedisRoleRepository redisRoleRepository;
 
     public final long AUTH_EXPIRATION = 8 * 60 * 60 * 1000; // // hour * minute * second * milli =>  8시간
+    private final SecurityException securityException;
 
 
     @Override
@@ -119,12 +119,16 @@ public class AuthService implements UserDetailsService {
 
         /// db 저장 (유저 정보)
         user.setFailCnt( 0 );
-        user.setChangedAt( Timestamp.valueOf( LocalDateTime.now() ) );
         userRepository.save( user );
 
 
         /// redis 저장 (유저 access token 값)
-        saveAccessToken( username, accessToken );
+        redisTokenRepository.save(
+                RedisTokenEntity.builder()
+                        .username( username )
+                        .accessToken( accessToken )
+                        .timeToLive( JwtUtil.ACCESS_EXPIRATION )
+                        .build() );
 
 
         /// security context 저장
@@ -139,8 +143,23 @@ public class AuthService implements UserDetailsService {
 
 
     /// TODO
-    public void logout( ) {
+    public void logout( String username ) {
+        RedisTokenEntity entity = redisTokenRepository.findByUsername( username );
+        if ( entity != null ) {
+            redisTokenRepository.delete( entity );
+        }
 
+        String name = securityUtil.getAuthentication().getName();
+        if ( name.equals( username ) ) {
+            securityUtil.clearContextHolder();
+        }
+
+    }
+
+
+    @Transactional(readOnly = true)
+    public Iterable< RedisRoleEntity > getRedisRoleAuthorities( ) {
+        return redisRoleRepository.findAll();
     }
 
 
@@ -148,52 +167,60 @@ public class AuthService implements UserDetailsService {
     @Transactional
     public void updateRoleAuthorities( ) {
         try {
-            List< TbRoles > activeRoles = roleRepository.findByIsActiveTrue();
-            List< TbRoleMenus > activeMenus = roleMenusRepository.findByIsActiveTrue();
-            List< TbRolePerms > activePerms = rolePermsRepository.findByIsActiveTrue();
 
-            List< RedisRoleEntity > redisEntities = new ArrayList<>();
+            List< TbRoles > activeRoles = roleRepository.findByIsActiveTrue();
+            List< TbRolePerms > activePerms = rolePermsRepository.findByIsActiveTrue();
+            List< TbRoleMenus > activeMenus = roleMenusRepository.findByIsActiveTrue().stream()
+                    .filter( el -> el.getMenu().getIsActive() )
+                    .toList();
+
+
+            Iterable< RedisRoleEntity > redisAll = redisRoleRepository.findAll();
+            List< RedisRoleEntity > redisDeleteList = new ArrayList<>( StreamSupport.stream( redisAll.spliterator(), false ).toList() );
+
+            List< RedisRoleEntity > redisSaveList = new ArrayList<>();
             for ( TbRoles role : activeRoles ) {
                 String roleName = role.getName();
 
+                /// active false 목록을 레디스에서 삭제하기 위한 전처리
+                Optional< RedisRoleEntity > updateElement = redisDeleteList.stream()
+                        .filter( el -> el.getRoleName().equals( roleName ) )
+                        .findFirst();
+                updateElement.ifPresent( redisDeleteList::remove );
+
+
+                /// menu
                 List< String > menus = activeMenus.stream()
                         .filter( roleMenu -> Objects.equals( roleMenu.getRole().getId(), role.getId() ) )
                         .map( roleMenu -> roleMenu.getMenu().getCode() )
                         .toList();
 
+
+                /// perms
                 List< String > perms = activePerms.stream()
                         .filter( rolePerm -> Objects.equals( rolePerm.getRole().getId(), role.getId() ) )
                         .map( TbRolePerms::getPermCd )
                         .toList();
 
-                redisEntities.add( RedisRoleEntity.builder()
+
+                /// 저장
+                redisSaveList.add( RedisRoleEntity.builder()
                         .roleName( roleName )
                         .perms( perms )
                         .menus( menus )
                         .timeToLive( AUTH_EXPIRATION )
                         .build() );
+
             }
 
-            redisRoleRepository.saveAll( redisEntities );
+            redisRoleRepository.deleteAll( redisDeleteList );
+            redisRoleRepository.saveAll( redisSaveList );
+
         } catch ( Exception e ) {
-            log.error( ServiceMessageType.FAIL_CACHE_UPDATE.getServiceMessage() );
+            log.error( ServiceMessageType.FAIL_CACHE_UPDATE.getServiceMessage(), e );
+
+            throw new ServiceException( ServiceMessageType.FAIL_CACHE_UPDATE );
         }
-    }
-
-
-    public Iterable< RedisRoleEntity > getRedisRoleAuthorities( ) {
-        Iterable< RedisRoleEntity > all = redisRoleRepository.findAll();
-        return redisRoleRepository.findAll();
-    }
-
-
-    private void saveAccessToken( String username, String accessToken ) {
-        redisTokenRepository.save(
-                RedisTokenEntity.builder()
-                        .userId( username )
-                        .accessToken( accessToken )
-                        .timeToLive( JwtUtil.ACCESS_EXPIRATION )
-                        .build() );
     }
 
 

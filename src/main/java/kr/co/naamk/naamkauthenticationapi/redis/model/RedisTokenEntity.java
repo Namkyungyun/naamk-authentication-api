@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @RedisHash(value="access_token")
 public class RedisTokenEntity {
     @Id
-    private String userId; // access_token:${userId}
+    private String username; // access_token:${username}
 
     @Indexed
     private String accessToken;

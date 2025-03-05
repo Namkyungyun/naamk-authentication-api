@@ -1,5 +1,8 @@
 package kr.co.naamk.naamkauthenticationapi.mapstruct;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.processing.Generated;
 import kr.co.naamk.naamkauthenticationapi.domain.TbUsers;
 import kr.co.naamk.naamkauthenticationapi.web.dto.UserDto;
@@ -12,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class UserMapperImpl implements UserMapper {
 
     @Override
-    public TbUsers toEntity(UserDto.CreateRequest dto) {
+    public TbUsers ToEntity(UserDto.CreateRequest dto) {
         if ( dto == null ) {
             return null;
         }
@@ -25,5 +28,28 @@ public class UserMapperImpl implements UserMapper {
         tbUsers.setEmail( dto.getEmail() );
 
         return tbUsers;
+    }
+
+    @Override
+    public UserDto toDto(TbUsers entity, Timestamp expiredDate, List<String> authorities) {
+        if ( entity == null && expiredDate == null && authorities == null ) {
+            return null;
+        }
+
+        UserDto.UserDtoBuilder userDto = UserDto.builder();
+
+        if ( entity != null ) {
+            userDto.id( entity.getId() );
+            userDto.username( entity.getUsername() );
+            userDto.name( entity.getName() );
+            userDto.email( entity.getEmail() );
+        }
+        userDto.expiredDate( expiredDate );
+        List<String> list = authorities;
+        if ( list != null ) {
+            userDto.authorities( new ArrayList<String>( list ) );
+        }
+
+        return userDto.build();
     }
 }

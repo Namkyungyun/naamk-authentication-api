@@ -31,11 +31,25 @@ public class RoleController {
                 .build();
     }
 
-    /// 역할에 따른 Access 수정 (perms, menus)
-    @PutMapping(value="/role-auth", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object updateRolePerms(HttpServletRequest request, @RequestBody RoleDto.AuthorityRequest dto ) {
+    @PutMapping(value="/role")
+    public Object updateRole(HttpServletRequest request, @RequestBody RoleDto.UpdateRequest dto ) {
 
-        Boolean result = roleService.updateRoleAuthorities( dto );
+        RoleDto result = roleService.updateRole( dto );
+        authService.updateRoleAuthorities();
+
+        return APIResponseEntityBuilder.create()
+                .service( request )
+                .entity( result )
+                .resultMessage( ServiceMessageType.SUCCESS )
+                .build();
+    }
+
+    /// 역할에 따른 Access 수정 (perms, menus)
+    @PutMapping(value="/role-access", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object updateRoleAccess( HttpServletRequest request, @RequestBody RoleDto.AccessRequest dto ) {
+
+        RoleDto.AccessResponse result = roleService.updateRoleAccess( dto );
+        authService.updateRoleAuthorities();
 
         return APIResponseEntityBuilder.create()
                 .service( request )
