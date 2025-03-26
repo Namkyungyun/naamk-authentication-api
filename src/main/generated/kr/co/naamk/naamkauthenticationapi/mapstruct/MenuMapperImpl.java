@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class MenuMapperImpl implements MenuMapper {
 
     @Override
-    public TbAdminMenus createDtoToEntity( AdminMenuDto.CreateRequest dto) {
+    public TbAdminMenus createDtoToEntity(AdminMenuDto.CreateRequest dto) {
         if ( dto == null ) {
             return null;
         }
@@ -31,7 +31,7 @@ public class MenuMapperImpl implements MenuMapper {
     }
 
     @Override
-    public TbAdminMenus updateDtoToEntity( AdminMenuDto.UpdateRequest dto) {
+    public TbAdminMenus updateDtoToEntity(AdminMenuDto.UpdateRequest dto) {
         if ( dto == null ) {
             return null;
         }
@@ -50,32 +50,32 @@ public class MenuMapperImpl implements MenuMapper {
     }
 
     @Override
-    public AdminMenuDto toDto( TbAdminMenus entity) {
+    public AdminMenuDto toDto(TbAdminMenus entity) {
         if ( entity == null ) {
             return null;
         }
 
-        AdminMenuDto.MenuDtoBuilder menuDto = AdminMenuDto.builder();
+        AdminMenuDto.AdminMenuDtoBuilder adminMenuDto = AdminMenuDto.builder();
 
-        menuDto.id( entity.getId() );
-        menuDto.code( entity.getCode() );
-        menuDto.name( entity.getName() );
-        menuDto.desc( entity.getDesc() );
-        menuDto.parentId( entity.getParentId() );
-        menuDto.order( entity.getOrder() );
-        menuDto.isActive( entity.getIsActive() );
-        menuDto.url( entity.getUrl() );
+        adminMenuDto.id( entity.getId() );
+        adminMenuDto.code( entity.getCode() );
+        adminMenuDto.name( entity.getName() );
+        adminMenuDto.desc( entity.getDesc() );
+        adminMenuDto.parentId( entity.getParentId() );
+        adminMenuDto.order( entity.getOrder() );
+        adminMenuDto.isActive( entity.getIsActive() );
+        adminMenuDto.url( entity.getUrl() );
 
-        return menuDto.build();
+        return adminMenuDto.build();
     }
 
     @Override
-    public List< AdminMenuDto > toDtoList( List<TbAdminMenus> entities) {
+    public List<AdminMenuDto> toDtoList(List<TbAdminMenus> entities) {
         if ( entities == null ) {
             return null;
         }
 
-        List< AdminMenuDto > list = new ArrayList< AdminMenuDto >( entities.size() );
+        List<AdminMenuDto> list = new ArrayList<AdminMenuDto>( entities.size() );
         for ( TbAdminMenus tbAdminMenus : entities ) {
             list.add( toDto( tbAdminMenus ) );
         }

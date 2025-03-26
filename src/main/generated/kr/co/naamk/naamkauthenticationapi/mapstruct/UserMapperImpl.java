@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class UserMapperImpl implements UserMapper {
 
     @Override
-    public TbAdminUsers ToEntity( AdminUserDto.CreateRequest dto) {
+    public TbAdminUsers ToEntity(AdminUserDto.CreateRequest dto) {
         if ( dto == null ) {
             return null;
         }
@@ -31,25 +31,25 @@ public class UserMapperImpl implements UserMapper {
     }
 
     @Override
-    public AdminUserDto toDto( TbAdminUsers entity, Timestamp expiredDate, List<String> authorities) {
+    public AdminUserDto toDto(TbAdminUsers entity, Timestamp expiredDate, List<String> authorities) {
         if ( entity == null && expiredDate == null && authorities == null ) {
             return null;
         }
 
-        AdminUserDto.UserDtoBuilder userDto = AdminUserDto.builder();
+        AdminUserDto.AdminUserDtoBuilder adminUserDto = AdminUserDto.builder();
 
         if ( entity != null ) {
-            userDto.id( entity.getId() );
-            userDto.username( entity.getUsername() );
-            userDto.name( entity.getName() );
-            userDto.email( entity.getEmail() );
+            adminUserDto.id( entity.getId() );
+            adminUserDto.username( entity.getUsername() );
+            adminUserDto.name( entity.getName() );
+            adminUserDto.email( entity.getEmail() );
         }
-        userDto.expiredDate( expiredDate );
+        adminUserDto.expiredDate( expiredDate );
         List<String> list = authorities;
         if ( list != null ) {
-            userDto.authorities( new ArrayList<String>( list ) );
+            adminUserDto.authorities( new ArrayList<String>( list ) );
         }
 
-        return userDto.build();
+        return adminUserDto.build();
     }
 }

@@ -4,7 +4,7 @@ import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminMenus;
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoleMenus;
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRolePerms;
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoles;
-import kr.co.naamk.naamkauthenticationapi.domain.type.Perms;
+import kr.co.naamk.naamkauthenticationapi.domain.type.PermType;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
 import kr.co.naamk.naamkauthenticationapi.mapstruct.RoleMapper;
@@ -44,8 +44,8 @@ public class AdminRoleService {
 
         /// rolePerms
         List< TbAdminRolePerms > rolePerms = new ArrayList<>();
-        List< Perms > perms = Arrays.stream( Perms.values() ).toList();
-        for ( Perms perm : perms ) {
+        List< PermType > perms = Arrays.stream( PermType.values() ).toList();
+        for ( PermType perm : perms ) {
             TbAdminRolePerms rolePerm = new TbAdminRolePerms();
             rolePerm.setRole( newRole );
             rolePerm.setPermCd( perm.getCode() );

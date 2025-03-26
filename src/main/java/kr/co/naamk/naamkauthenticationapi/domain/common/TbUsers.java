@@ -3,7 +3,7 @@ package kr.co.naamk.naamkauthenticationapi.domain.common;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import kr.co.naamk.naamkauthenticationapi.domain.audit.AuditEntity;
+import kr.co.naamk.naamkauthenticationapi.domain.audit.AuditOnlyDateEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +17,7 @@ import java.sql.Timestamp;
                 @UniqueConstraint(name = "users_unique", columnNames = "name"),
                 @UniqueConstraint(name = "users_username_key", columnNames = "username")
         })
-public class TbUsers extends AuditEntity {
+public class TbUsers extends AuditOnlyDateEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

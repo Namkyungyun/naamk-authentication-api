@@ -2,6 +2,7 @@ package kr.co.naamk.naamkauthenticationapi.domain.common;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import kr.co.naamk.naamkauthenticationapi.domain.audit.AuditOnlyDateEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +12,7 @@ import java.time.Instant;
 @Setter
 @Entity
 @Table(name = "user_terms", schema = "public")
-public class TbUserTerm {
+public class TbUserTerm extends AuditOnlyDateEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_terms_id_gen")
     @SequenceGenerator(name = "user_terms_id_gen", sequenceName = "user_terms_id_seq", allocationSize = 1)
@@ -34,11 +35,5 @@ public class TbUserTerm {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = false;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
-
-    @NotNull
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
 
 }
