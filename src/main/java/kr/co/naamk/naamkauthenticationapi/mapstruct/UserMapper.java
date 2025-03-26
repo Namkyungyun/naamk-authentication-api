@@ -1,7 +1,7 @@
 package kr.co.naamk.naamkauthenticationapi.mapstruct;
 
-import kr.co.naamk.naamkauthenticationapi.domain.TbUsers;
-import kr.co.naamk.naamkauthenticationapi.web.dto.UserDto;
+import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminUsers;
+import kr.co.naamk.naamkauthenticationapi.web.dto.AdminUserDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -14,9 +14,9 @@ public interface UserMapper {
 
     UserMapper INSTANCE = Mappers.getMapper( UserMapper.class );
 
-    TbUsers ToEntity( UserDto.CreateRequest dto);
+    TbAdminUsers ToEntity( AdminUserDto.CreateRequest dto);
 
-    UserDto toDto( TbUsers entity, Timestamp expiredDate, List<String> authorities);
+    AdminUserDto toDto( TbAdminUsers entity, Timestamp expiredDate, List<String> authorities);
 
 
 

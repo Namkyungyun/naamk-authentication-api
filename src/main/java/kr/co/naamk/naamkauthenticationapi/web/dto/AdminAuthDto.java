@@ -2,9 +2,11 @@ package kr.co.naamk.naamkauthenticationapi.web.dto;
 
 import lombok.*;
 
+import java.sql.Timestamp;
+
 @Data
 @Builder
-public class AuthDto {
+public class AdminAuthDto {
 
     @Setter @Getter
     @AllArgsConstructor @NoArgsConstructor
@@ -18,6 +20,7 @@ public class AuthDto {
     public static class LoginResponse {
         private Integer userId;
         private String accessToken;
+        private Timestamp expiredAt;
     }
 
     @AllArgsConstructor @NoArgsConstructor

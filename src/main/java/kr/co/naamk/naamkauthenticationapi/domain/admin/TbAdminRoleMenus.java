@@ -1,4 +1,4 @@
-package kr.co.naamk.naamkauthenticationapi.domain;
+package kr.co.naamk.naamkauthenticationapi.domain.admin;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +11,7 @@ import org.hibernate.annotations.Comment;
 @Setter
 @Entity
 @Table(name = "role_menus", schema = "admin")
-public class TbRoleMenus {
+public class TbAdminRoleMenus {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_menus_id_gen")
     @SequenceGenerator(name = "role_menus_id_gen", sequenceName = "role_menus_id_seq", allocationSize = 1)
@@ -22,13 +22,13 @@ public class TbRoleMenus {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", nullable = false)
     @Comment( "역할ID" )
-    private TbRoles role;
+    private TbAdminRoles role;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "menu_id", nullable = false)
     @Comment( "메뉴ID" )
-    private TbMenus menu;
+    private TbAdminMenus menu;
 
     @NotNull
     @ColumnDefault("true")

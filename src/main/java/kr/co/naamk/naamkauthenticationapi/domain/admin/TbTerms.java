@@ -1,4 +1,4 @@
-package kr.co.naamk.naamkauthenticationapi.domain;
+package kr.co.naamk.naamkauthenticationapi.domain.admin;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -7,8 +7,6 @@ import kr.co.naamk.naamkauthenticationapi.domain.audit.AuditEntity;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-
-import java.time.Instant;
 
 @Getter
 @Setter

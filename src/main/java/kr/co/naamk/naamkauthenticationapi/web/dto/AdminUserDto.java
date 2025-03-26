@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class UserDto {
+public class AdminUserDto {
     private Integer id;
     private String username;
     private String name;
@@ -41,15 +41,15 @@ public class UserDto {
     @Setter @Getter
     @Builder
     public static class AccessRequest {
-        private Integer userId;
-        private List<AuthDto.ActiveRequest> roles;
+        private Integer id;
+        private List< AdminAuthDto.ActiveRequest> roles;
     }
 
     @AllArgsConstructor @NoArgsConstructor
     @Setter @Getter
     @Builder
     public static class AccessResponse {
-        private Integer userId;
+        private Integer id;
         private String username;
         private List<UserRoleResponse> roles;
     }
@@ -61,6 +61,21 @@ public class UserDto {
         private Integer id;
         private String roleName;
         private Boolean isActive;
+    }
+
+    @AllArgsConstructor @NoArgsConstructor
+    @Getter @Setter
+    @Builder
+    public static class PasswordRequest {
+        private Integer id;
+        private String password;
+    }
+
+    @Data
+    @Builder
+    public static class PasswordResponse {
+        private Integer id;
+        private Timestamp expiredAt;
     }
 
 }

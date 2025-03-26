@@ -1,15 +1,15 @@
 package kr.co.naamk.naamkauthenticationapi.web.service;
 
-import kr.co.naamk.naamkauthenticationapi.domain.TbMenus;
-import kr.co.naamk.naamkauthenticationapi.domain.TbRoleMenus;
-import kr.co.naamk.naamkauthenticationapi.domain.TbRoles;
+import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminMenus;
+import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoleMenus;
+import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoles;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
 import kr.co.naamk.naamkauthenticationapi.mapstruct.MenuMapper;
-import kr.co.naamk.naamkauthenticationapi.web.dto.MenuDto;
-import kr.co.naamk.naamkauthenticationapi.web.repository.MenuRepository;
-import kr.co.naamk.naamkauthenticationapi.web.repository.RoleMenusRepository;
-import kr.co.naamk.naamkauthenticationapi.web.repository.RoleRepository;
+import kr.co.naamk.naamkauthenticationapi.web.dto.AdminMenuDto;
+import kr.co.naamk.naamkauthenticationapi.web.repository.AdminMenuRepository;
+import kr.co.naamk.naamkauthenticationapi.web.repository.AdminRoleMenusRepository;
+import kr.co.naamk.naamkauthenticationapi.web.repository.AdminRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,36 +21,36 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class MenuService {
+public class AdminMenuService {
 
-    private final MenuRepository menuRepository;
-    private final RoleRepository roleRepository;
-    private final RoleMenusRepository roleMenusRepository;
+    private final AdminMenuRepository adminMenuRepository;
+    private final AdminRoleRepository adminRoleRepository;
+    private final AdminRoleMenusRepository adminRoleMenusRepository;
 
 
     @Transactional
-    public MenuDto createMenu( MenuDto.CreateRequest dto ) {
+    public AdminMenuDto createMenu( AdminMenuDto.CreateRequest dto ) {
         /// checking menu
-        Optional< TbMenus > menu = menuRepository.findByCode( dto.getCode() );
+        Optional< TbAdminMenus > menu = adminMenuRepository.findByCode( dto.getCode() );
         if ( menu.isPresent() ) {
             throw new ServiceException( ServiceMessageType.ALREADY_EXIST, "The requested code is already exist" );
         }
 
         /// save menu
-        int menusCnt = (int) menuRepository.count();
+        int menusCnt = (int) adminMenuRepository.count();
 
-        TbMenus entity = MenuMapper.INSTANCE.createDtoToEntity( dto );
+        TbAdminMenus entity = MenuMapper.INSTANCE.createDtoToEntity( dto );
         entity.setOrder( menusCnt + 1 );
         entity.setIsActive( false );
         entity.setUrl( dto.getUrl() );
-        TbMenus newMenu = menuRepository.save( entity );
+        TbAdminMenus newMenu = adminMenuRepository.save( entity );
 
 
         /// save RoleMenu
-        List< TbRoleMenus > roleMenus = new ArrayList<>();
-        List< TbRoles > roles = roleRepository.findAll();
-        for ( TbRoles role : roles ) {
-            TbRoleMenus roleMenu = new TbRoleMenus();
+        List< TbAdminRoleMenus > roleMenus = new ArrayList<>();
+        List< TbAdminRoles > roles = adminRoleRepository.findAll();
+        for ( TbAdminRoles role : roles ) {
+            TbAdminRoleMenus roleMenu = new TbAdminRoleMenus();
             roleMenu.setRole( role );
             roleMenu.setMenu( newMenu );
             roleMenu.setIsActive( false );
@@ -58,19 +58,19 @@ public class MenuService {
             roleMenus.add( roleMenu );
         }
 
-        roleMenusRepository.saveAll( roleMenus );
+        adminRoleMenusRepository.saveAll( roleMenus );
 
         return MenuMapper.INSTANCE.toDto( newMenu );
     }
 
 
     @Transactional
-    public MenuDto updateMenu( MenuDto.UpdateRequest dto ) {
+    public AdminMenuDto updateMenu( AdminMenuDto.UpdateRequest dto ) {
         /// checking menu
-        TbMenus entity = menuRepository.findById( dto.getId() )
+        TbAdminMenus entity = adminMenuRepository.findById( dto.getId() )
                 .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "The requested id is not exist" ) );
 
-        List< TbMenus > sameLevelList = menuRepository.findAllByParentIdOrderByOrder( entity.getParentId() );
+        List< TbAdminMenus > sameLevelList = adminMenuRepository.findAllByParentIdOrderByOrder( entity.getParentId() );
         if(dto.getOrder() > sameLevelList.size()) {
             dto.setOrder( sameLevelList.size() );
         }
@@ -93,15 +93,15 @@ public class MenuService {
             sameLevelList.removeIf( el -> el.getId().equals( entity.getId() ) );
             sameLevelList.add(entity.getOrder()-1, entity);
 
-            for(TbMenus menu : sameLevelList) {
+            for( TbAdminMenus menu : sameLevelList) {
                 menu.setOrder( orderNo );
                 orderNo++;
             }
 
-            menuRepository.saveAll( sameLevelList );
+            adminMenuRepository.saveAll( sameLevelList );
 
         } else {
-            menuRepository.save( entity );
+            adminMenuRepository.save( entity );
         }
 
         return MenuMapper.INSTANCE.toDto( entity );
@@ -118,39 +118,39 @@ public class MenuService {
     public Map<String, Boolean> deleteMenu( Integer id ) {
 
         /// checking menu
-        TbMenus entity = menuRepository.findById( id )
+        TbAdminMenus entity = adminMenuRepository.findById( id )
                 .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "The request id does not exist" ) );
 
 
         /// update menus (consider re-order)
-        List< TbMenus > sameLevelList = menuRepository.findAllByParentIdOrderByOrder( entity.getParentId() );
+        List< TbAdminMenus > sameLevelList = adminMenuRepository.findAllByParentIdOrderByOrder( entity.getParentId() );
         sameLevelList.removeIf( el -> el.getId().equals( entity.getId() ) );
 
         int orderNo = 1;
-        for(TbMenus menu : sameLevelList) {
+        for( TbAdminMenus menu : sameLevelList) {
             menu.setOrder( orderNo );
             orderNo++;
         }
 
-        menuRepository.deleteById( id );
-        menuRepository.saveAll( sameLevelList );
+        adminMenuRepository.deleteById( id );
+        adminMenuRepository.saveAll( sameLevelList );
 
         return Map.of("result", true);
     }
 
 
     @Transactional(readOnly = true)
-    public List< MenuDto > getActiveMenus( ) {
+    public List< AdminMenuDto > getActiveMenus( ) {
         return List.of();
     }
 
     @Transactional(readOnly = true)
-    public List< MenuDto > getAllMenus( ) {
+    public List< AdminMenuDto > getAllMenus( ) {
         return List.of();
     }
 
     @Transactional(readOnly = true)
-    public List< MenuDto > getMenusByUserId( ) {
+    public List< AdminMenuDto > getMenusByUserId( ) {
         return List.of();
     }
 

@@ -1,9 +1,8 @@
 package kr.co.naamk.naamkauthenticationapi.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
-import kr.co.naamk.naamkauthenticationapi.domain.TbRoles;
+import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoles;
 import lombok.RequiredArgsConstructor;
-import org.mapstruct.ap.shaded.freemarker.template.utility.SecurityUtilities;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -25,7 +24,7 @@ public class SecurityUtil {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
-    public List< GrantedAuthority > getAuthorities( List< TbRoles > roles ) {
+    public List< GrantedAuthority > getAuthorities( List< TbAdminRoles > roles ) {
         return roles.stream()
                 .map( role -> new SimpleGrantedAuthority( role.getName() ) )
                 .collect( toList() );

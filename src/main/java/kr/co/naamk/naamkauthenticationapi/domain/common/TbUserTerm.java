@@ -1,4 +1,4 @@
-package kr.co.naamk.naamkauthenticationapi.domain;
+package kr.co.naamk.naamkauthenticationapi.domain.common;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

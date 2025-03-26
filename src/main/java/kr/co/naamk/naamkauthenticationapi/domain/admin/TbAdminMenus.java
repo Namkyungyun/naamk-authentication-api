@@ -1,4 +1,4 @@
-package kr.co.naamk.naamkauthenticationapi.domain;
+package kr.co.naamk.naamkauthenticationapi.domain.admin;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -13,7 +13,7 @@ import org.hibernate.annotations.Comment;
 @Setter
 @Entity
 @Table(name = "menus", schema = "admin")
-public class TbMenus extends AuditEntity {
+public class TbAdminMenus extends AuditEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "menus_id_gen")
     @SequenceGenerator(name = "menus_id_gen", sequenceName = "menus_id_seq", allocationSize = 1)

@@ -1,4 +1,4 @@
-package kr.co.naamk.naamkauthenticationapi.domain;
+package kr.co.naamk.naamkauthenticationapi.domain.admin;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -11,13 +11,12 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "users", schema = "admin")
-public class TbUsers extends AuditEntity {
+public class TbAdminUsers extends AuditEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_gen")
     @SequenceGenerator(name = "users_id_gen", sequenceName = "users_id_seq", allocationSize = 1)

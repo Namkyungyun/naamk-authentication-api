@@ -3,8 +3,8 @@ package kr.co.naamk.naamkauthenticationapi.mapstruct;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
-import kr.co.naamk.naamkauthenticationapi.domain.TbMenus;
-import kr.co.naamk.naamkauthenticationapi.web.dto.MenuDto;
+import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminMenus;
+import kr.co.naamk.naamkauthenticationapi.web.dto.AdminMenuDto;
 import org.springframework.stereotype.Component;
 
 @Generated(
@@ -14,48 +14,48 @@ import org.springframework.stereotype.Component;
 public class MenuMapperImpl implements MenuMapper {
 
     @Override
-    public TbMenus createDtoToEntity(MenuDto.CreateRequest dto) {
+    public TbAdminMenus createDtoToEntity( AdminMenuDto.CreateRequest dto) {
         if ( dto == null ) {
             return null;
         }
 
-        TbMenus tbMenus = new TbMenus();
+        TbAdminMenus tbAdminMenus = new TbAdminMenus();
 
-        tbMenus.setCode( dto.getCode() );
-        tbMenus.setName( dto.getName() );
-        tbMenus.setDesc( dto.getDesc() );
-        tbMenus.setParentId( dto.getParentId() );
-        tbMenus.setUrl( dto.getUrl() );
+        tbAdminMenus.setCode( dto.getCode() );
+        tbAdminMenus.setName( dto.getName() );
+        tbAdminMenus.setDesc( dto.getDesc() );
+        tbAdminMenus.setParentId( dto.getParentId() );
+        tbAdminMenus.setUrl( dto.getUrl() );
 
-        return tbMenus;
+        return tbAdminMenus;
     }
 
     @Override
-    public TbMenus updateDtoToEntity(MenuDto.UpdateRequest dto) {
+    public TbAdminMenus updateDtoToEntity( AdminMenuDto.UpdateRequest dto) {
         if ( dto == null ) {
             return null;
         }
 
-        TbMenus tbMenus = new TbMenus();
+        TbAdminMenus tbAdminMenus = new TbAdminMenus();
 
-        tbMenus.setId( dto.getId() );
-        tbMenus.setName( dto.getName() );
-        tbMenus.setDesc( dto.getDesc() );
-        tbMenus.setParentId( dto.getParentId() );
-        tbMenus.setUrl( dto.getUrl() );
-        tbMenus.setOrder( dto.getOrder() );
-        tbMenus.setIsActive( dto.getIsActive() );
+        tbAdminMenus.setId( dto.getId() );
+        tbAdminMenus.setName( dto.getName() );
+        tbAdminMenus.setDesc( dto.getDesc() );
+        tbAdminMenus.setParentId( dto.getParentId() );
+        tbAdminMenus.setUrl( dto.getUrl() );
+        tbAdminMenus.setOrder( dto.getOrder() );
+        tbAdminMenus.setIsActive( dto.getIsActive() );
 
-        return tbMenus;
+        return tbAdminMenus;
     }
 
     @Override
-    public MenuDto toDto(TbMenus entity) {
+    public AdminMenuDto toDto( TbAdminMenus entity) {
         if ( entity == null ) {
             return null;
         }
 
-        MenuDto.MenuDtoBuilder menuDto = MenuDto.builder();
+        AdminMenuDto.MenuDtoBuilder menuDto = AdminMenuDto.builder();
 
         menuDto.id( entity.getId() );
         menuDto.code( entity.getCode() );
@@ -70,14 +70,14 @@ public class MenuMapperImpl implements MenuMapper {
     }
 
     @Override
-    public List<MenuDto> toDtoList(List<TbMenus> entities) {
+    public List< AdminMenuDto > toDtoList( List<TbAdminMenus> entities) {
         if ( entities == null ) {
             return null;
         }
 
-        List<MenuDto> list = new ArrayList<MenuDto>( entities.size() );
-        for ( TbMenus tbMenus : entities ) {
-            list.add( toDto( tbMenus ) );
+        List< AdminMenuDto > list = new ArrayList< AdminMenuDto >( entities.size() );
+        for ( TbAdminMenus tbAdminMenus : entities ) {
+            list.add( toDto( tbAdminMenus ) );
         }
 
         return list;

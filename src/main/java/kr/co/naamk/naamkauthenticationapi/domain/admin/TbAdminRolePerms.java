@@ -1,4 +1,4 @@
-package kr.co.naamk.naamkauthenticationapi.domain;
+package kr.co.naamk.naamkauthenticationapi.domain.admin;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +11,7 @@ import org.hibernate.annotations.Comment;
 @Setter
 @Entity
 @Table(name = "role_perms", schema = "admin")
-public class TbRolePerms {
+public class TbAdminRolePerms {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_perms_id_gen")
     @SequenceGenerator(name = "role_perms_id_gen", sequenceName = "role_perms_id_seq", allocationSize = 1)
@@ -22,7 +22,7 @@ public class TbRolePerms {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", nullable = false)
     @Comment( "역할ID" )
-    private TbRoles role;
+    private TbAdminRoles role;
 
     @NotNull
     @Column(name="perm_cd", nullable = false)

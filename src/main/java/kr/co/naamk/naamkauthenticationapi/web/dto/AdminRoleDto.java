@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class RoleDto {
+public class AdminRoleDto {
 
     private Integer id;
     private String name;
@@ -37,8 +37,8 @@ public class RoleDto {
     @Builder
     public static class AccessRequest {
         private Integer roleId;
-        private List<AuthDto.ActiveRequest> perms;
-        private List<AuthDto.ActiveRequest> menus;
+        private List< AdminAuthDto.ActiveRequest> perms;
+        private List< AdminAuthDto.ActiveRequest> menus;
     }
 
 

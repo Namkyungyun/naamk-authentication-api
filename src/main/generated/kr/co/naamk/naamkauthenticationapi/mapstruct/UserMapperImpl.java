@@ -4,8 +4,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
-import kr.co.naamk.naamkauthenticationapi.domain.TbUsers;
-import kr.co.naamk.naamkauthenticationapi.web.dto.UserDto;
+import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminUsers;
+import kr.co.naamk.naamkauthenticationapi.web.dto.AdminUserDto;
 import org.springframework.stereotype.Component;
 
 @Generated(
@@ -15,28 +15,28 @@ import org.springframework.stereotype.Component;
 public class UserMapperImpl implements UserMapper {
 
     @Override
-    public TbUsers ToEntity(UserDto.CreateRequest dto) {
+    public TbAdminUsers ToEntity( AdminUserDto.CreateRequest dto) {
         if ( dto == null ) {
             return null;
         }
 
-        TbUsers tbUsers = new TbUsers();
+        TbAdminUsers tbAdminUsers = new TbAdminUsers();
 
-        tbUsers.setUsername( dto.getUsername() );
-        tbUsers.setPassword( dto.getPassword() );
-        tbUsers.setName( dto.getName() );
-        tbUsers.setEmail( dto.getEmail() );
+        tbAdminUsers.setUsername( dto.getUsername() );
+        tbAdminUsers.setPassword( dto.getPassword() );
+        tbAdminUsers.setName( dto.getName() );
+        tbAdminUsers.setEmail( dto.getEmail() );
 
-        return tbUsers;
+        return tbAdminUsers;
     }
 
     @Override
-    public UserDto toDto(TbUsers entity, Timestamp expiredDate, List<String> authorities) {
+    public AdminUserDto toDto( TbAdminUsers entity, Timestamp expiredDate, List<String> authorities) {
         if ( entity == null && expiredDate == null && authorities == null ) {
             return null;
         }
 
-        UserDto.UserDtoBuilder userDto = UserDto.builder();
+        AdminUserDto.UserDtoBuilder userDto = AdminUserDto.builder();
 
         if ( entity != null ) {
             userDto.id( entity.getId() );

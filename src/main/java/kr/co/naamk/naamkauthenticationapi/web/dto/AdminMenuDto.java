@@ -4,7 +4,7 @@ import lombok.*;
 
 @Data
 @Builder
-public class MenuDto {
+public class AdminMenuDto {
     private Integer id;
     private String code;
     private String name;

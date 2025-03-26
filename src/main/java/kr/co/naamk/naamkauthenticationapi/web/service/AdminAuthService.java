@@ -1,21 +1,23 @@
 package kr.co.naamk.naamkauthenticationapi.web.service;
 
 import kr.co.naamk.naamkauthenticationapi.config.security.exception.SecurityException;
-import kr.co.naamk.naamkauthenticationapi.domain.*;
+import kr.co.naamk.naamkauthenticationapi.domain.admin.*;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
 import kr.co.naamk.naamkauthenticationapi.redis.model.RedisRoleEntity;
 import kr.co.naamk.naamkauthenticationapi.redis.model.RedisTokenEntity;
 import kr.co.naamk.naamkauthenticationapi.redis.repository.RedisRoleRepository;
 import kr.co.naamk.naamkauthenticationapi.redis.repository.RedisTokenRepository;
+import kr.co.naamk.naamkauthenticationapi.utils.DateUtil;
 import kr.co.naamk.naamkauthenticationapi.utils.JwtUtil;
 import kr.co.naamk.naamkauthenticationapi.utils.SecurityUtil;
-import kr.co.naamk.naamkauthenticationapi.web.dto.AuthDto;
+import kr.co.naamk.naamkauthenticationapi.web.dto.AdminAuthDto;
 import kr.co.naamk.naamkauthenticationapi.web.repository.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,25 +28,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AuthService implements UserDetailsService {
+public class AdminAuthService implements UserDetailsService {
 
+    private final DateUtil dateUtil;
     private final JwtUtil jwtUtil;
     private final SecurityUtil securityUtil;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private final AdminUserRepository adminUserRepository;
+    private final AdminRoleRepository adminRoleRepository;
 
-    private final UserRolesRepository userRolesRepository;
-    private final RoleMenusRepository roleMenusRepository;
-    private final RolePermsRepository rolePermsRepository;
+    private final AdminUserRolesRepository adminUserRolesRepository;
+    private final AdminRoleMenusRepository adminRoleMenusRepository;
+    private final AdminRolePermsRepository adminRolePermsRepository;
 
     private final RedisTokenRepository redisTokenRepository;
     private final RedisRoleRepository redisRoleRepository;
@@ -56,7 +58,7 @@ public class AuthService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername( String username ) throws UsernameNotFoundException {
         /// user
-        TbUsers user = userRepository.findByUsername( username )
+        TbAdminUsers user = adminUserRepository.findByUsername( username )
                 .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
 
         /// authorities
@@ -77,8 +79,8 @@ public class AuthService implements UserDetailsService {
      * @return
      */
     @Transactional
-    public AuthDto.LoginResponse login( AuthDto.LoginRequest dto ) {
-        TbUsers user = userRepository.findByUsername( dto.getUsername() ) // username = login id
+    public AdminAuthDto.LoginResponse login( AdminAuthDto.LoginRequest dto ) {
+        TbAdminUsers user = adminUserRepository.findByUsername( dto.getUsername() ) // username = login id
                 .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
 
         /// check active
@@ -98,11 +100,10 @@ public class AuthService implements UserDetailsService {
         if ( !matches ) {
             Integer failCnt = user.getFailCnt() + 1;
             user.setFailCnt( failCnt );
-            userRepository.save( user );
+            adminUserRepository.save( user );
 
             throw new ServiceException( ServiceMessageType.FAIL_LOGIN, "잘못된 비밀번호입니다." );
         }
-
 
         /// generate Authentication (Security context에 저장)
         String username = dto.getUsername();
@@ -116,15 +117,16 @@ public class AuthService implements UserDetailsService {
         List< String > authorityTexts = authorities.stream().map( GrantedAuthority::getAuthority ).toList();
         String accessToken = jwtUtil.createAccessToken( username, authorityTexts );
 
+        /// expiredAt
+        Timestamp expiredAt = dateUtil.getExpiredAt( user.getChangedAt() );
 
         /// db 저장 (유저 정보)
         user.setFailCnt( 0 );
-        userRepository.save( user );
+        adminUserRepository.save( user );
 
 
         /// redis 저장 (유저 access token 값)
-        redisTokenRepository.save(
-                RedisTokenEntity.builder()
+        redisTokenRepository.save( RedisTokenEntity.builder()
                         .username( username )
                         .accessToken( accessToken )
                         .timeToLive( JwtUtil.ACCESS_EXPIRATION )
@@ -135,22 +137,22 @@ public class AuthService implements UserDetailsService {
         SecurityContextHolder.getContext().setAuthentication( authentication );
 
 
-        return AuthDto.LoginResponse.builder()
+        return AdminAuthDto.LoginResponse.builder()
                 .userId( user.getId() )
                 .accessToken( accessToken )
+                .expiredAt( expiredAt )
                 .build();
     }
 
 
-    /// TODO
     public void logout( String username ) {
         RedisTokenEntity entity = redisTokenRepository.findByUsername( username );
         if ( entity != null ) {
             redisTokenRepository.delete( entity );
         }
 
-        String name = securityUtil.getAuthentication().getName();
-        if ( name.equals( username ) ) {
+        User principal = (User) securityUtil.getAuthentication().getPrincipal();
+        if ( principal.getUsername().equals( username ) ) {
             securityUtil.clearContextHolder();
         }
 
@@ -165,12 +167,12 @@ public class AuthService implements UserDetailsService {
 
     /// Save role info in Redis (roleName, menus, perms)
     @Transactional
-    public void updateRoleAuthorities( ) {
+    public void refreshAuthorities( ) {
         try {
 
-            List< TbRoles > activeRoles = roleRepository.findByIsActiveTrue();
-            List< TbRolePerms > activePerms = rolePermsRepository.findByIsActiveTrue();
-            List< TbRoleMenus > activeMenus = roleMenusRepository.findByIsActiveTrue().stream()
+            List< TbAdminRoles > activeRoles = adminRoleRepository.findByIsActiveTrue();
+            List< TbAdminRolePerms > activePerms = adminRolePermsRepository.findByIsActiveTrue();
+            List< TbAdminRoleMenus > activeMenus = adminRoleMenusRepository.findByIsActiveTrue().stream()
                     .filter( el -> el.getMenu().getIsActive() )
                     .toList();
 
@@ -179,7 +181,7 @@ public class AuthService implements UserDetailsService {
             List< RedisRoleEntity > redisDeleteList = new ArrayList<>( StreamSupport.stream( redisAll.spliterator(), false ).toList() );
 
             List< RedisRoleEntity > redisSaveList = new ArrayList<>();
-            for ( TbRoles role : activeRoles ) {
+            for ( TbAdminRoles role : activeRoles ) {
                 String roleName = role.getName();
 
                 /// active false 목록을 레디스에서 삭제하기 위한 전처리
@@ -199,7 +201,7 @@ public class AuthService implements UserDetailsService {
                 /// perms
                 List< String > perms = activePerms.stream()
                         .filter( rolePerm -> Objects.equals( rolePerm.getRole().getId(), role.getId() ) )
-                        .map( TbRolePerms::getPermCd )
+                        .map( TbAdminRolePerms::getPermCd )
                         .toList();
 
 
@@ -217,9 +219,9 @@ public class AuthService implements UserDetailsService {
             redisRoleRepository.saveAll( redisSaveList );
 
         } catch ( Exception e ) {
-            log.error( ServiceMessageType.FAIL_CACHE_UPDATE.getServiceMessage(), e );
+            log.error( ServiceMessageType.ERROR_CACHE.getServiceMessage(), e );
 
-            throw new ServiceException( ServiceMessageType.FAIL_CACHE_UPDATE );
+            throw new ServiceException( ServiceMessageType.ERROR_CACHE );
         }
     }
 
@@ -231,11 +233,11 @@ public class AuthService implements UserDetailsService {
      * @return
      */
     private List< GrantedAuthority > getAuthorities( Integer userId ) {
-        List< TbUserRoles > roles = userRolesRepository.findByUserId( userId );
+        List< TbAdminUserRoles > roles = adminUserRolesRepository.findByUserId( userId );
         List< GrantedAuthority > authorities = new ArrayList<>();
 
         if ( !roles.isEmpty() ) {
-            List< TbRoles > list = roles.stream().map( TbUserRoles::getRole ).toList();
+            List< TbAdminRoles > list = roles.stream().map( TbAdminUserRoles::getRole ).toList();
             authorities = securityUtil.getAuthorities( list );
         } else {
             authorities.add( new SimpleGrantedAuthority( "ANONYMOUS" ) );

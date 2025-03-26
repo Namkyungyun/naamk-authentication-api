@@ -1,7 +1,7 @@
 package kr.co.naamk.naamkauthenticationapi.mapstruct;
 
-import kr.co.naamk.naamkauthenticationapi.domain.TbMenus;
-import kr.co.naamk.naamkauthenticationapi.web.dto.MenuDto;
+import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminMenus;
+import kr.co.naamk.naamkauthenticationapi.web.dto.AdminMenuDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -13,10 +13,10 @@ public interface MenuMapper {
 
     MenuMapper INSTANCE = Mappers.getMapper( MenuMapper.class );
 
-    TbMenus createDtoToEntity( MenuDto.CreateRequest dto );
-    TbMenus updateDtoToEntity( MenuDto.UpdateRequest dto );
+    TbAdminMenus createDtoToEntity( AdminMenuDto.CreateRequest dto );
+    TbAdminMenus updateDtoToEntity( AdminMenuDto.UpdateRequest dto );
 
-    MenuDto toDto( TbMenus entity );
-    List<MenuDto> toDtoList( List<TbMenus> entities );
+    AdminMenuDto toDto( TbAdminMenus entity );
+    List< AdminMenuDto > toDtoList( List< TbAdminMenus > entities );
 
 }

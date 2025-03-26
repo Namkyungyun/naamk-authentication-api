@@ -1,8 +1,7 @@
 package kr.co.naamk.naamkauthenticationapi.mapstruct;
 
-import kr.co.naamk.naamkauthenticationapi.domain.TbRolePerms;
-import kr.co.naamk.naamkauthenticationapi.domain.TbRoles;
-import kr.co.naamk.naamkauthenticationapi.web.dto.RoleDto;
+import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoles;
+import kr.co.naamk.naamkauthenticationapi.web.dto.AdminRoleDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
@@ -12,7 +11,7 @@ public interface RoleMapper {
 
     RoleMapper INSTANCE = Mappers.getMapper( RoleMapper.class );
 
-    TbRoles createDtoToEntity( RoleDto.CreateRequest dto );
+    TbAdminRoles createDtoToEntity( AdminRoleDto.CreateRequest dto );
 
-    RoleDto toDto( TbRoles role );
+    AdminRoleDto toDto( TbAdminRoles role );
 }
