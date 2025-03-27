@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
     value = "org.mapstruct.ap.MappingProcessor"
 )
 @Component
-public class UserMapperImpl implements UserMapper {
+public class AdminUserMapperImpl implements AdminUserMapper {
 
     @Override
     public TbAdminUsers ToEntity(AdminUserDto.CreateRequest dto) {

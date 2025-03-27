@@ -12,7 +12,7 @@ import org.hibernate.annotations.ColumnDefault;
 @Setter
 @Entity
 @Table(name = "reports_hist", schema = "community")
-public class ReportsHist extends AuditOnlyDateEntity {
+public class TbReportsHist extends AuditOnlyDateEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reports_hist_id_gen")
     @SequenceGenerator(name = "reports_hist_id_gen", sequenceName = "reports_hist_id_seq", allocationSize = 1)

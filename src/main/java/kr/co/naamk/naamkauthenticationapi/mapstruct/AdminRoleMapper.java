@@ -7,9 +7,9 @@ import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, unmappedSourcePolicy = ReportingPolicy.IGNORE)
-public interface RoleMapper {
+public interface AdminRoleMapper {
 
-    RoleMapper INSTANCE = Mappers.getMapper( RoleMapper.class );
+    AdminRoleMapper INSTANCE = Mappers.getMapper( AdminRoleMapper.class );
 
     TbAdminRoles createDtoToEntity( AdminRoleDto.CreateRequest dto );
 

@@ -10,9 +10,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, unmappedSourcePolicy = ReportingPolicy.IGNORE)
-public interface UserMapper {
+public interface AdminUserMapper {
 
-    UserMapper INSTANCE = Mappers.getMapper( UserMapper.class );
+    AdminUserMapper INSTANCE = Mappers.getMapper( AdminUserMapper.class );
 
     TbAdminUsers ToEntity( AdminUserDto.CreateRequest dto);
 

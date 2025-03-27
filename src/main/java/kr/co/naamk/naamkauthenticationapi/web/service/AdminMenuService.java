@@ -5,7 +5,7 @@ import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoleMenus;
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoles;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
-import kr.co.naamk.naamkauthenticationapi.mapstruct.MenuMapper;
+import kr.co.naamk.naamkauthenticationapi.mapstruct.AdminMenuMapper;
 import kr.co.naamk.naamkauthenticationapi.web.dto.AdminMenuDto;
 import kr.co.naamk.naamkauthenticationapi.web.repository.AdminMenuRepository;
 import kr.co.naamk.naamkauthenticationapi.web.repository.AdminRoleMenusRepository;
@@ -39,7 +39,7 @@ public class AdminMenuService {
         /// save menu
         int menusCnt = (int) adminMenuRepository.count();
 
-        TbAdminMenus entity = MenuMapper.INSTANCE.createDtoToEntity( dto );
+        TbAdminMenus entity = AdminMenuMapper.INSTANCE.createDtoToEntity( dto );
         entity.setOrder( menusCnt + 1 );
         entity.setIsActive( false );
         entity.setUrl( dto.getUrl() );
@@ -60,7 +60,7 @@ public class AdminMenuService {
 
         adminRoleMenusRepository.saveAll( roleMenus );
 
-        return MenuMapper.INSTANCE.toDto( newMenu );
+        return AdminMenuMapper.INSTANCE.toDto( newMenu );
     }
 
 
@@ -104,7 +104,7 @@ public class AdminMenuService {
             adminMenuRepository.save( entity );
         }
 
-        return MenuMapper.INSTANCE.toDto( entity );
+        return AdminMenuMapper.INSTANCE.toDto( entity );
     }
 
 

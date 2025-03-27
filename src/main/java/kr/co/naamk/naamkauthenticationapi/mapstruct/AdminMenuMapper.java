@@ -9,9 +9,9 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, unmappedSourcePolicy = ReportingPolicy.IGNORE)
-public interface MenuMapper {
+public interface AdminMenuMapper {
 
-    MenuMapper INSTANCE = Mappers.getMapper( MenuMapper.class );
+    AdminMenuMapper INSTANCE = Mappers.getMapper( AdminMenuMapper.class );
 
     TbAdminMenus createDtoToEntity( AdminMenuDto.CreateRequest dto );
     TbAdminMenus updateDtoToEntity( AdminMenuDto.UpdateRequest dto );

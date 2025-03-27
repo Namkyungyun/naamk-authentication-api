@@ -8,14 +8,20 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum RoleType {
-    provisional( "role_provisional" ), user( "role_user" ), resetPwdUser("role_reset"), withdrawal( "role_withdrawal" ), locked("role_lock");
+    provisional( "role_provisional", "?" ),
+    user( "role_user", "정상" ),
+    resetPwdUser( "role_reset", "PW 초기화" ),
+    withdrawal( "role_withdrawal", "탈퇴 신청" ),
+    locked( "role_lock", "잠김" )
+    ;
 
-    private String roleName;
+    private final String roleName;
+    private final String roleNameKo;
 
     // roleName을 기반으로 RoleType 반환 메서드
-    public static RoleType fromRoleName(String roleName) {
-        for (RoleType role : RoleType.values()) {
-            if (role.getRoleName().equalsIgnoreCase(roleName)) {
+    public static RoleType fromRoleName( String roleName ) {
+        for ( RoleType role : RoleType.values() ) {
+            if ( role.getRoleName().equalsIgnoreCase( roleName ) ) {
                 return role;
             }
         }

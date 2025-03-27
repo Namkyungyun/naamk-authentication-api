@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import kr.co.naamk.naamkauthenticationapi.domain.audit.AuditEntity;
-import kr.co.naamk.naamkauthenticationapi.domain.audit.AuditOnlyDateEntity;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
@@ -13,7 +12,7 @@ import org.hibernate.annotations.ColumnDefault;
 @Setter
 @Entity
 @Table(name = "penalty_hist", schema = "community")
-public class PenaltyHist extends AuditEntity {
+public class TbPenaltyHist extends AuditEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "penalty_hist_id_gen")
     @SequenceGenerator(name = "penalty_hist_id_gen", sequenceName = "penalty_hist_id_seq", allocationSize = 1)

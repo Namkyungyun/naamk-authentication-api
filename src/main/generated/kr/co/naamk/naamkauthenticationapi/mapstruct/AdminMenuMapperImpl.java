@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
     value = "org.mapstruct.ap.MappingProcessor"
 )
 @Component
-public class MenuMapperImpl implements MenuMapper {
+public class AdminMenuMapperImpl implements AdminMenuMapper {
 
     @Override
     public TbAdminMenus createDtoToEntity(AdminMenuDto.CreateRequest dto) {

@@ -5,7 +5,7 @@ import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminUserRoles;
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminUsers;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
-import kr.co.naamk.naamkauthenticationapi.mapstruct.UserMapper;
+import kr.co.naamk.naamkauthenticationapi.mapstruct.AdminUserMapper;
 import kr.co.naamk.naamkauthenticationapi.utils.DateUtil;
 import kr.co.naamk.naamkauthenticationapi.utils.SecurityUtil;
 import kr.co.naamk.naamkauthenticationapi.web.dto.AdminAuthDto;
@@ -53,7 +53,7 @@ public class AdminUserService {
         List< String > authorityNames = securityUtil.getAuthorityNames( authorities );
 
         /// new user
-        TbAdminUsers newUser = UserMapper.INSTANCE.ToEntity( dto );
+        TbAdminUsers newUser = AdminUserMapper.INSTANCE.ToEntity( dto );
         newUser.setPassword( passwordEncoder.encode( dto.getPassword() ) );
         newUser.setFailCnt( 0 );
         newUser.setChangedAt( dateUtil.getNow() );
@@ -80,7 +80,7 @@ public class AdminUserService {
         LocalDateTime newDateTime = localDateTime.plusDays( 90 );
         Timestamp expiredDate = Timestamp.valueOf( newDateTime );
 
-        return UserMapper.INSTANCE.toDto( savedUser, expiredDate, authorityNames );
+        return AdminUserMapper.INSTANCE.toDto( savedUser, expiredDate, authorityNames );
     }
 
     @Transactional
@@ -108,7 +108,7 @@ public class AdminUserService {
         /// 비멀번호 만료일
         Timestamp expiredDate = dateUtil.getExpiredAt(entity.getChangedAt());
 
-        return UserMapper.INSTANCE.toDto( user, expiredDate, authorityNames );
+        return AdminUserMapper.INSTANCE.toDto( user, expiredDate, authorityNames );
 
 
     }

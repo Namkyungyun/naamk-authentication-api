@@ -7,7 +7,7 @@ import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoles;
 import kr.co.naamk.naamkauthenticationapi.domain.type.PermType;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
-import kr.co.naamk.naamkauthenticationapi.mapstruct.RoleMapper;
+import kr.co.naamk.naamkauthenticationapi.mapstruct.AdminRoleMapper;
 import kr.co.naamk.naamkauthenticationapi.web.dto.AdminAuthDto;
 import kr.co.naamk.naamkauthenticationapi.web.dto.AdminRoleDto;
 import kr.co.naamk.naamkauthenticationapi.web.repository.AdminMenuRepository;
@@ -39,7 +39,7 @@ public class AdminRoleService {
             throw new ServiceException( ServiceMessageType.ALREADY_EXIST, "The request name is already existing " );
         }
 
-        TbAdminRoles entity = RoleMapper.INSTANCE.createDtoToEntity( dto );
+        TbAdminRoles entity = AdminRoleMapper.INSTANCE.createDtoToEntity( dto );
         TbAdminRoles newRole = adminRoleRepository.save( entity );
 
         /// rolePerms
@@ -70,7 +70,7 @@ public class AdminRoleService {
         }
         adminRoleMenusRepository.saveAll( roleMenus );
 
-        return RoleMapper.INSTANCE.toDto( newRole );
+        return AdminRoleMapper.INSTANCE.toDto( newRole );
     }
 
 
@@ -84,7 +84,7 @@ public class AdminRoleService {
 
         TbAdminRoles entity = adminRoleRepository.save( role );
 
-        return RoleMapper.INSTANCE.toDto( entity );
+        return AdminRoleMapper.INSTANCE.toDto( entity );
     }
 
     @Transactional
