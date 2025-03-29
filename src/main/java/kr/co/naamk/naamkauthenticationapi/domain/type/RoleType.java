@@ -11,7 +11,7 @@ public enum RoleType {
     provisional( "role_provisional", "?" ),
     user( "role_user", "정상" ),
     resetPwdUser( "role_reset", "PW 초기화" ),
-    withdrawal( "role_withdrawal", "탈퇴 신청" ),
+    withdrawal( "role_withdraw", "탈퇴 신청" ),
     locked( "role_lock", "잠김" )
     ;
 

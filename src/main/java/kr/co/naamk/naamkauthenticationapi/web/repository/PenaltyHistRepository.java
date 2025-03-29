@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface PenaltyHistRepository extends JpaRepository< TbPenaltyHist, Long > {
-    List<TbPenaltyHist> findByLinkedIdAndType( Long linkedId, String type );
+    List<TbPenaltyHist> findByLinkedIdAndTypeOrderByCreatedAtDesc( Long linkedId, String type );
 }

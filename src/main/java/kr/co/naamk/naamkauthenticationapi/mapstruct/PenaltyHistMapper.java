@@ -14,10 +14,9 @@ public interface PenaltyHistMapper {
     PenaltyHistMapper INSTANCE = Mappers.getMapper( PenaltyHistMapper.class );
 
     TbPenaltyHist toEntity( PenaltyHistDto dto);
-
+    TbPenaltyHist toEntity( PenaltyHistDto.CreateRequest dto);
 
     PenaltyHistDto toDto( TbPenaltyHist entity);
-
     List<PenaltyHistDto> toDtoList( List<TbPenaltyHist> entity);
 
 }

@@ -3,6 +3,7 @@ package kr.co.naamk.naamkauthenticationapi.web.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import kr.co.naamk.naamkauthenticationapi.domain.type.PenaltyStatusType;
 import kr.co.naamk.naamkauthenticationapi.domain.type.RoleType;
+import kr.co.naamk.naamkauthenticationapi.domain.type.SearchCommon;
 import lombok.*;
 
 import java.sql.Timestamp;
@@ -78,6 +79,11 @@ public class UserDto {
 
         public String getUserStatus() {
             return RoleType.fromRoleName(role).getRoleNameKo();
+        }
+
+        public List< Map< String, Object > > getPenaltyStatusList() {
+            SearchCommon searchCommon = new SearchCommon();
+            return searchCommon.penaltyStatus;
         }
 
     }
