@@ -32,7 +32,7 @@ public class UserController {
     @PostMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getUsers( HttpServletRequest request, @RequestBody UserDto.SearchRequest dto, Pageable pageable ) {
 
-        Page< UserDto > result = userService.findList(dto, pageable);
+        Page< UserDto > result = userService.findUserList(dto, pageable);
 
         return APIResponseEntityBuilder.create()
                 .service( request )
@@ -41,10 +41,10 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping(value="/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object getUserById(HttpServletRequest request, @PathVariable(value="id") Long id) {
+    @GetMapping(value="/users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object getUserById(HttpServletRequest request, @PathVariable(value="userId") Long userId) {
 
-        UserDto.UserDetailResponse result = userService.findById( id );
+        UserDto.UserDetailResponse result = userService.findUserById( userId );
 
         return APIResponseEntityBuilder.create()
                 .service( request )

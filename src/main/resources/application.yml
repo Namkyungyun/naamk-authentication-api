@@ -33,6 +33,20 @@ jwt: # 64byte
   access-token:
     sign-key: uxsZKT3i0IhLnk3WCsvgN7kiw8DLhfWohRKLTXPRTGo= # HMAC ?? ? (Base64 ???? ?)
 
+secure:
+  aes:
+    gcm:
+      alg: AES
+      padding: 'AES/GCM/NoPadding'
+      IVLang: 12
+      tagLang: 16
+      salt: 'PH+jiWwySnqxmnqZlW8WTlyd8jBzZ1olrXLijaeHrvU='
+      secretKey: '0eCaPirfxBoNoT6gm/Gp7pH880mx3Hc2tCKoGCA0KbA='
+    ecb:
+      #bpmgbpmgbpmg
+      salt: 'YnBtZ2JwbWdicG1nYnBtZw=='
+      #web3gemhubwithbpmg
+      secretKey: 'd2ViM2dlbWh1YndpdGhicG1n'
 
 #logging:
 #  level:

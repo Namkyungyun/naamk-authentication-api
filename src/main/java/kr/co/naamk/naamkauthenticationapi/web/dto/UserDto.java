@@ -57,6 +57,7 @@ public class UserDto {
         private List<Map<String, Object>> penaltyStatus;
     }
 
+
     @Setter @Getter
     @AllArgsConstructor
     @NoArgsConstructor

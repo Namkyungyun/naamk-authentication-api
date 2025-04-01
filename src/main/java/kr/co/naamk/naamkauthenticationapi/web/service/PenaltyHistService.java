@@ -2,6 +2,7 @@ package kr.co.naamk.naamkauthenticationapi.web.service;
 
 import kr.co.naamk.naamkauthenticationapi.domain.common.TbUsers;
 import kr.co.naamk.naamkauthenticationapi.domain.community.TbPenaltyHist;
+import kr.co.naamk.naamkauthenticationapi.domain.community.TbReportsHist;
 import kr.co.naamk.naamkauthenticationapi.domain.type.PenaltyType;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
@@ -24,30 +25,30 @@ public class PenaltyHistService {
     private final ReportHistRepository reportHistRepository;
 
     @Transactional(readOnly = true)
-    public List<PenaltyHistDto> getHistByIdAndType(Long userId, String type) {
-        TbUsers user = userRepository.findById( userId )
-                .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
-
-        List< TbPenaltyHist > entities = penaltyHistRepository.findByLinkedIdAndTypeOrderByCreatedAtDesc( user.getId(), type );
-        List< PenaltyHistDto > dtoList = PenaltyHistMapper.INSTANCE.toDtoList( entities );
-        Boolean isExistReport = reportHistRepository.existsByLinkedIdAndType( user.getId(), type );
-
-        dtoList.forEach( dto -> {dto.setIsExistReport( isExistReport );} );
-
-        return dtoList;
+    public List<PenaltyHistDto> findHistListByUserIdAndType( Long userId, String type) throws ServiceException {
+        return  penaltyHistRepository.findPenaltyHistsByUserIdAndType( userId, type );
     }
 
     @Transactional(rollbackFor = Exception.class)
     public PenaltyHistDto saveUserPenalty( Long userId, PenaltyHistDto.CreateRequest dto) throws ServiceException {
-        TbUsers user = userRepository.findById( userId )
-                .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
-
         TbPenaltyHist entity = PenaltyHistMapper.INSTANCE.toEntity( dto );
-        entity.setLinkedId( user.getId() );
+        entity.setLinkedId( userId );
         entity.setType( PenaltyType.user.name() );
 
         TbPenaltyHist savedEntity = penaltyHistRepository.save( entity );
 
+        // 신고 접수 처리됨 update
+        List< TbReportsHist > uncompletedReports = reportHistRepository.findByIsActiveTrueAndCreatedAtBefore( savedEntity.getCreatedAt() );
+        uncompletedReports.forEach( el -> el.setIsActive( false ) );
+        reportHistRepository.saveAll( uncompletedReports );
+
+
         return PenaltyHistMapper.INSTANCE.toDto( savedEntity );
+    }
+
+    @Transactional(readOnly = true)
+    public TbUsers getUserById(Long userId) {
+        return userRepository.findById( userId )
+                .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
     }
 }

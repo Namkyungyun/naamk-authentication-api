@@ -88,7 +88,8 @@ public interface UserRepository extends JpaRepository< TbUsers, Long > {
                 SELECT linked_id, is_active
                 FROM community.penalty_hist
                 WHERE type = 'user'
-                ORDER BY linked_id, created_at DESC
+                AND linked_id = :userId
+                ORDER BY created_at DESC
               LIMIT 1
             ) ph ON ph.linked_id = u.id
             LEFT JOIN (

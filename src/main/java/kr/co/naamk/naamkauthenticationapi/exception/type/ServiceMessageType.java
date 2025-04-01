@@ -9,12 +9,14 @@ public enum ServiceMessageType {
     SUCCESS(200, "SUCCESS"),
     NOT_DEFINED_ERROR( 9999, "This is an undefined ERROR." ),
 
+    // encrypt or decrypt
+    ENCRYPT_ERR(903, "Failed to encrypt data." ),
+    DECRYPT_ERR(904, "Failed to decrypt data." ),
     ERROR_CACHE(905, "Failed to update cache data."),
     ERROR_SQL( 906, " SQL Error" ),
     ERROR_IO( 907, "Server IO Error" ),
     ERROR_DATA_CONVERT(908, "Data Convert Error"),
     ERROR_NULL_DATA(909, "Null value encountered during mapping"),
-
 
     REQUEST_PARAM_ERROR( 1303, "The requested parameter was invalid." ),
     REQUEST_ENTITY_TYPE_ERROR( 1304, "The requested Entity Type does not match." ),
@@ -32,6 +34,9 @@ public enum ServiceMessageType {
     NOT_FOUND(3000, "The requested resource could not be found."),
     ALREADY_EXIST(3001, "The requested resource already exist."),
     EMPTY_REQUEST(3002, "The requested values are empty."),
+    NO_DATA(3003, "no data."),
+    SERVICE_ID_NOT_VALID(3004, "The request Service type is not valid."),
+
     ;
 
     private final Integer code;

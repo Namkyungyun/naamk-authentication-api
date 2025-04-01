@@ -29,14 +29,17 @@ public class TbPenaltyHist extends AuditOnlyCreateEntity {
     @Size(max = 5)
     @NotNull
     @Column(name = "type", nullable = false, length = 5)
+    @Comment( "enum post|user" )
     private String type;
 
     @NotNull
     @Column(name = "linked_id", nullable = false)
+    @Comment( "userId | postId" )
     private Long linkedId;
 
     @ColumnDefault("true")
     @Column(name = "is_active")
+    @Comment( "정상 : true | 차단 : false" )
     private Boolean isActive;
 
     @NotNull
