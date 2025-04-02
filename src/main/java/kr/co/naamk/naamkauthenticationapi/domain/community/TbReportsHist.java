@@ -16,7 +16,7 @@ import org.hibernate.annotations.Comment;
 public class TbReportsHist extends AuditOnlyDateEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reports_hist_id_gen")
-    @SequenceGenerator(name = "reports_hist_id_gen", sequenceName = "reports_hist_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "reports_hist_id_gen", sequenceName = "community.reports_hist_id_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Long id;
 

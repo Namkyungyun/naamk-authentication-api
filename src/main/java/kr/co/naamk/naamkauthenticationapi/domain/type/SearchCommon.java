@@ -12,14 +12,8 @@ import java.util.Map;
 public class SearchCommon {
     public List< Map< String, String > > userStatus = getUserStatus();
     public List< Map< String, Object > > penaltyStatus = getPenaltyStatus();
+    public List< Map< String, Object > > reportStatus = getReportStatus();
 
-    @Setter
-    @Getter
-    @AllArgsConstructor
-    public static class TableHeader {
-        private String variableName;
-        private String variableLabel;
-    }
 
     private List< Map< String, String > > getUserStatus( ) {
         /// 계정 상태 3개 [정상, 탈퇴 신청, pw 초기화]
@@ -44,7 +38,18 @@ public class SearchCommon {
             map.put( "value", type.getStatusValue() );
             return map;
         } ).toList();
+    }
 
+    private List< Map< String, Object > > getReportStatus( ) {
+        /// 신고 상태 2개 [ 접수 , 처리완료 ]
+        List< ReportStatusType > types = List.of( ReportStatusType.complete, ReportStatusType.unComplete );
+
+        return types.stream().map( type -> {
+            Map< String, Object > map = new HashMap<>();
+            map.put( "label", type.getStatusName() );
+            map.put( "value", type.getStatusValue() );
+            return map;
+        } ).toList();
     }
 
 

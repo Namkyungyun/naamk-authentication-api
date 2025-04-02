@@ -18,7 +18,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping(value="/users/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value="/search-options", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getSearch(HttpServletRequest request) {
         UserDto.SearchOption result = userService.getSearch();
 
@@ -52,6 +52,5 @@ public class UserController {
                 .entity( result )
                 .build();
     }
-
 
 }

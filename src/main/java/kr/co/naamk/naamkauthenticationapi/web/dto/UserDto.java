@@ -26,7 +26,7 @@ public class UserDto {
     private Timestamp createdAt;
 
     public String getPenaltyStatus() {
-        return PenaltyStatusType.fromStatusValue(penalty).getStatusName();
+        return PenaltyStatusType.fromStatusValue(true, penalty).getStatusName();
     }
 
     public String getUserStatus() {
@@ -75,7 +75,7 @@ public class UserDto {
         private Boolean penalty;
 
         public String getPenaltyStatus() {
-            return PenaltyStatusType.fromStatusValue(penalty).getStatusName();
+            return PenaltyStatusType.fromStatusValue(true, penalty).getStatusName();
         }
 
         public String getUserStatus() {

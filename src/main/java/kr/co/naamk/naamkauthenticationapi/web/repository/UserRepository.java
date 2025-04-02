@@ -27,13 +27,14 @@ public interface UserRepository extends JpaRepository< TbUsers, Long > {
               COALESCE(ph.is_active, true) AS penalty,
               u.created_at AS createdAt
             FROM public.users u
-            LEFT JOIN (
-              SELECT DISTINCT ON (linked_id) *
-              FROM community.penalty_hist
-              WHERE type = 'user'
-              ORDER BY linked_id, created_at DESC
-              LIMIT 1
-            ) ph ON ph.linked_id = u.id
+            LEFT JOIN LATERAL (
+               SELECT ph1.is_active
+               FROM community.penalty_hist ph1
+               WHERE ph1.linked_id = u.id
+                 AND ph1.type = 'user'
+               ORDER BY ph1.created_at DESC
+               LIMIT 1
+            ) ph ON true
             WHERE (:name IS NULL OR u.name LIKE CONCAT(:name, '%'))
               AND (:nickname IS NULL OR u.nickname LIKE CONCAT(:nickname, '%'))
               AND (:userStatus IS NULL OR u.role LIKE CONCAT(:userStatus, '%'))

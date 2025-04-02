@@ -22,7 +22,7 @@ public class PenaltyHistDto {
     private Boolean isExistReport;
 
     public String getPenaltyStatus() {
-        return PenaltyStatusType.fromStatusValue(isActive).getStatusName();
+        return PenaltyStatusType.fromStatusValue(true, isActive).getStatusName();
     }
 
     @Getter @Setter
