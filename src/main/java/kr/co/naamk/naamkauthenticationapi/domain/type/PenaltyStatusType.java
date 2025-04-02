@@ -9,13 +9,19 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum PenaltyStatusType {
-    ok( true, "정상" ), block( false, "차단" );
+    ok( true, "정상" ),
+    block( false, "차단" );
+
 
     private final Boolean statusValue;
     private final String statusName;
 
     // roleName을 기반으로 RoleType 반환 메서드
     public static PenaltyStatusType fromStatusValue( Boolean statusValue) {
+        if (statusValue == null) {
+            return ok;
+        }
+
         for ( PenaltyStatusType penalty : PenaltyStatusType.values()) {
             if (penalty.getStatusValue().equals(statusValue)) {
                 return penalty;

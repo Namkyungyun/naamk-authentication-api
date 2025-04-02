@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +43,28 @@ public class UserService {
             endDate = Timestamp.from( searchRequest.getEndDate().plusDays( 1 ).toInstant() );
         }
 
+        List< UserDto > list = userRepository.findUsersWithPenalty(
+                searchRequest.getName(),
+                searchRequest.getNickname(),
+                searchRequest.getUserStatus(),
+                searchRequest.getPenaltyStatus(),
+                startDate,
+                endDate
+              );
+
+        List< UserDto > filtered = list.stream()
+                .filter( el -> {
+                    String decryptedEmail = aesGCMEncryptionUtil.decrypt( el.getEmail() );
+                    el.setEmail( decryptedEmail );
+
+                    if ( searchRequest.getEmail() != null ) {
+                        return decryptedEmail.equals( searchRequest.getEmail());
+                    }
+
+                    return true;
+                } ).toList();
+
+
         Sort sort = Sort.by(
                 Sort.Order.desc( "createdAt" ),
                 Sort.Order.desc( "id" )
@@ -48,24 +72,12 @@ public class UserService {
 
         pageable = PageRequest.of( Math.max( pageable.getPageNumber(), 0 ), pageable.getPageSize(), sort );
 
-        Page< UserDto > object = userRepository.findUsersWithPenalty(
-                searchRequest.getName(),
-                searchRequest.getNickname(),
-                searchRequest.getUserStatus(),
-                searchRequest.getEmail(),
-                searchRequest.getPenaltyStatus(),
-                startDate,
-                endDate,
-                pageable );
+        int start = (int) pageable.getOffset() > filtered.size() ? 0 : (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filtered.size());
 
-        object.getContent().forEach( el -> {
-                    String encryptedEmail = el.getEmail();
-                    String decryptedEmail = aesGCMEncryptionUtil.decrypt( encryptedEmail );
-                    el.setEmail( decryptedEmail );
-                }
-        );
+        List<UserDto> pagedList = filtered.subList(start, end);
 
-        return object;
+        return new PageImpl<>(pagedList, pageable, filtered.size());
     }
 
 

@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -35,41 +36,20 @@ public interface UserRepository extends JpaRepository< TbUsers, Long > {
             ) ph ON ph.linked_id = u.id
             WHERE (:name IS NULL OR u.name LIKE CONCAT(:name, '%'))
               AND (:nickname IS NULL OR u.nickname LIKE CONCAT(:nickname, '%'))
-              AND (:email IS NULL OR u.email LIKE CONCAT(:email, '%'))
               AND (:userStatus IS NULL OR u.role LIKE CONCAT(:userStatus, '%'))
               AND (:penaltyStatus IS NULL OR COALESCE(ph.is_active, true) = CAST(:penaltyStatus AS boolean))
               AND (CAST(:startDate AS timestamp) IS NULL OR u.created_at >= CAST(:startDate AS TIMESTAMP))
               AND (CAST(:endDate AS timestamp) IS NULL OR u.created_at < CAST(:endDate AS TIMESTAMP))
             ORDER BY u.created_at DESC
-        """,
-            countQuery = """
-            SELECT COUNT(*)
-            FROM public.users u
-            LEFT JOIN (
-              SELECT is_active, linked_id
-              FROM community.penalty_hist
-              WHERE type = 'user'
-              ORDER BY linked_id, created_at DESC
-              LIMIT 1
-            ) ph ON ph.linked_id = u.id
-            WHERE (:name IS NULL OR u.name LIKE CONCAT(:name, '%'))
-              AND (:nickname IS NULL OR u.nickname LIKE CONCAT(:nickname, '%'))
-              AND (:email IS NULL OR u.email LIKE CONCAT(:email, '%'))
-              AND (:userStatus IS NULL OR u.role LIKE CONCAT(:userStatus, '%'))
-              AND (:penaltyStatus IS NULL OR COALESCE(ph.is_active, true) = CAST(:penaltyStatus AS boolean))
-              AND (CAST(:startDate AS timestamp) IS NULL OR u.created_at >= CAST(:startDate AS TIMESTAMP))
-              AND (CAST(:endDate AS timestamp) IS NULL OR u.created_at < CAST(:endDate AS TIMESTAMP))
         """
     )
-    Page<UserDto> findUsersWithPenalty(
+    List<UserDto> findUsersWithPenalty(
             @Param("name") String name,
             @Param("nickname") String nickname,
             @Param("userStatus") String userStatus,
-            @Param("email") String email,
             @Param("penaltyStatus") Boolean penaltyStatus,
             @Param("startDate") Timestamp startDate,
-            @Param("endDate") Timestamp endDate,
-            Pageable pageable
+            @Param("endDate") Timestamp endDate
     );
 
     @Query(nativeQuery = true, value = """
@@ -82,7 +62,7 @@ public interface UserRepository extends JpaRepository< TbUsers, Long > {
                 u.role,
                 u.created_at as createdAt,
                 f.thumb_s_url,
-                COALESCE(ph.is_active, true) AS penalty
+                ph.is_active AS penalty
             FROM public.users u
             LEFT JOIN (
                 SELECT linked_id, is_active
