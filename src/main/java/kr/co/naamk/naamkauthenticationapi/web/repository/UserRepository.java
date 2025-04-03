@@ -2,8 +2,6 @@ package kr.co.naamk.naamkauthenticationapi.web.repository;
 
 import kr.co.naamk.naamkauthenticationapi.domain.common.TbUsers;
 import kr.co.naamk.naamkauthenticationapi.web.dto.UserDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,6 +17,7 @@ public interface UserRepository extends JpaRepository< TbUsers, Long > {
             nativeQuery = true,
             value = """
             SELECT
+              (COUNT(*) OVER()) - ROW_NUMBER() OVER (ORDER BY u.created_at DESC) + 1 AS rowNum,
               u.id,
               u.name,
               u.nickname,

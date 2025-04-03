@@ -16,6 +16,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Builder
 public class UserDto {
+    private Long rowNum;
     private Long id;
     private String name;
     private String nickname;
