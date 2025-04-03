@@ -17,11 +17,10 @@ import java.util.Map;
 @NoArgsConstructor
 @Builder
 public class UserReportDto {
+    private Long rowNum;
     private Long id;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss", timezone = "Asia/Seoul")
     private Timestamp latestCreatedAt;
-
     private Long reportedUserId;
     private String reportedUserName;
     private Long reportCount;

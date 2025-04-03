@@ -18,6 +18,7 @@ public interface UserReportMapper {
 
     TbReportsHist toEntity( UserReportDto.CreateRequest dto);
 
+    @Mapping(target = "rowNum", source = "rowNum", qualifiedByName = "mapToLong")
     @Mapping(target = "id", source = "id", qualifiedByName = "mapToLong")
     @Mapping(target = "latestCreatedAt", source = "latestCreatedAt", qualifiedByName = "mapToTimestamp")
     @Mapping(target = "reportedUserId", source = "reportedUserId", qualifiedByName = "mapToLong")
