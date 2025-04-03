@@ -2,29 +2,27 @@ package kr.co.naamk.naamkauthenticationapi.web.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
-import kr.co.naamk.naamkauthenticationapi.web.dto.UserDto;
-import kr.co.naamk.naamkauthenticationapi.web.dto.UserPenaltyDto;
+import kr.co.naamk.naamkauthenticationapi.web.dto.UserReportDto;
 import kr.co.naamk.naamkauthenticationapi.web.dto.apiResponse.APIResponseEntityBuilder;
-import kr.co.naamk.naamkauthenticationapi.web.service.UserPenaltyService;
-import kr.co.naamk.naamkauthenticationapi.web.service.UserService;
+import kr.co.naamk.naamkauthenticationapi.web.service.UserReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user-penalty")
-public class UserPenaltyController {
+@RequestMapping("/api/v1/user-reports")
+public class UserReportController {
 
-    private final UserPenaltyService userPenaltyService;
+    private final UserReportService userReportService;
 
     @GetMapping(value="/search-options", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getSearch(HttpServletRequest request) {
-        UserPenaltyDto.SearchOption result = userPenaltyService.getSearch();
+        UserReportDto.SearchOption result = userReportService.getSearch();
 
         return APIResponseEntityBuilder.create()
                 .service( request )
@@ -34,8 +32,8 @@ public class UserPenaltyController {
     }
 
     @PostMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object getUsers( HttpServletRequest request, @RequestBody UserPenaltyDto.SearchRequest dto, Pageable pageable ) {
-        Page< UserPenaltyDto > result = userPenaltyService.findUserList(dto, pageable);
+    public Object getUsers( HttpServletRequest request, @RequestBody UserReportDto.SearchRequest dto, Pageable pageable ) {
+        Page< UserReportDto > result = userReportService.findAllUserReport(dto, pageable);
 
         return APIResponseEntityBuilder.create()
                 .service( request )
@@ -45,8 +43,8 @@ public class UserPenaltyController {
     }
 
     @PostMapping(value = "/report", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object craeteReport(HttpServletRequest request, @RequestBody UserPenaltyDto.CreateRequest dto){
-        Object result = userPenaltyService.createUserReport( dto );
+    public Object createReport(HttpServletRequest request, @RequestBody UserReportDto.CreateRequest dto){
+        Object result = userReportService.createUserReport( dto );
         return APIResponseEntityBuilder.create()
                 .service( request )
                 .resultMessage( ServiceMessageType.SUCCESS )
@@ -58,7 +56,7 @@ public class UserPenaltyController {
     @GetMapping(value="/users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getUserById(HttpServletRequest request, @PathVariable(value="userId") Long userId) {
 
-        UserPenaltyDto.UserDetailResponse result = userPenaltyService.findUserById( userId );
+        UserReportDto.UserDetailResponse result = userReportService.findLatestUserReport( userId );
 
         return APIResponseEntityBuilder.create()
                 .service( request )
@@ -72,7 +70,7 @@ public class UserPenaltyController {
                                         @PathVariable(value="userId") Long userId,
                                         Pageable pageable) {
 
-        Page< UserPenaltyDto.ReportHistResponse > result = userPenaltyService.findUserReportHist( userId , pageable);
+        Map<String, Object> result = userReportService.findUserReportHist( userId , pageable);
 
         return APIResponseEntityBuilder.create()
                 .service( request )

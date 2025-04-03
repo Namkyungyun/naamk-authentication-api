@@ -1,9 +1,7 @@
 package kr.co.naamk.naamkauthenticationapi.mapstruct;
 
-import kr.co.naamk.naamkauthenticationapi.domain.common.TbUsers;
 import kr.co.naamk.naamkauthenticationapi.domain.community.TbReportsHist;
-import kr.co.naamk.naamkauthenticationapi.web.dto.PenaltyHistDto;
-import kr.co.naamk.naamkauthenticationapi.web.dto.UserPenaltyDto;
+import kr.co.naamk.naamkauthenticationapi.web.dto.UserReportDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -11,15 +9,14 @@ import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, unmappedSourcePolicy = ReportingPolicy.IGNORE)
-public interface UserPenaltyMapper {
-    UserPenaltyMapper INSTANCE = Mappers.getMapper( UserPenaltyMapper.class );
+public interface UserReportMapper {
+    UserReportMapper INSTANCE = Mappers.getMapper( UserReportMapper.class );
 
-    TbReportsHist toEntity(UserPenaltyDto.CreateRequest dto);
+    TbReportsHist toEntity( UserReportDto.CreateRequest dto);
 
     @Mapping(target = "id", source = "id", qualifiedByName = "mapToLong")
     @Mapping(target = "latestCreatedAt", source = "latestCreatedAt", qualifiedByName = "mapToTimestamp")
@@ -30,8 +27,8 @@ public interface UserPenaltyMapper {
     @Mapping(target = "penalty", source = "penalty", qualifiedByName = "mapToBoolean")
     @Mapping(target = "penaltyCreatedBy", source = "penaltyCreatedBy", qualifiedByName = "mapToString")
     @Mapping(target = "penaltyCreatedAt", source = "penaltyCreatedAt", qualifiedByName = "mapToTimestamp")
-    UserPenaltyDto toUserPenaltyDto( Map<String, Object> map);
-    List<UserPenaltyDto> toUserPenaltyDtoList( List<Map<String, Object>> mapList);
+    UserReportDto toUserPenaltyDto( Map<String, Object> map);
+    List< UserReportDto > toUserPenaltyDtoList( List<Map<String, Object>> mapList);
 
     @Mapping(target = "id", source = "id", qualifiedByName = "mapToLong")
     @Mapping(target = "reportedUserId", source = "reportLinkId", qualifiedByName = "mapToLong")
@@ -43,7 +40,8 @@ public interface UserPenaltyMapper {
     @Mapping(target = "penaltyCreatedBy", source = "penaltyCreatedBy", qualifiedByName = "mapToString")
     @Mapping(target = "penaltyCreatedAt", source = "penaltyCreatedAt", qualifiedByName = "mapToTimestamp")
     @Mapping(target = "penaltyDescription", source = "penaltyDescription", qualifiedByName = "mapToString")
-    UserPenaltyDto.UserDetailResponse toUserPenaltyDetailResponse( Map<String, Object> map);
+    @Mapping(target = "reportedUserProfileUrl", source = "reportedUserProfileUrl", qualifiedByName = "mapToString")
+    UserReportDto.UserDetailResponse toUserPenaltyDetailResponse( Map<String, Object> map);
 
 
     @Mapping(target = "id", source = "id", qualifiedByName = "mapToLong")
@@ -53,8 +51,8 @@ public interface UserPenaltyMapper {
     @Mapping(target = "penalty", source = "penalty", qualifiedByName = "mapToBoolean")
     @Mapping(target = "reportCreatedBy", source = "reportCreatedBy", qualifiedByName = "mapToString")
     @Mapping(target = "reportCreatedAt", source = "reportCreatedAt", qualifiedByName = "mapToTimestamp")
-    UserPenaltyDto.ReportHistResponse toReportHistResponse( Map<String, Object> map);
-    List<UserPenaltyDto.ReportHistResponse> toReportHistResponseList( List<Map<String, Object>> mapList);
+    UserReportDto.ReportHistResponse toReportHistResponse( Map<String, Object> map);
+    List< UserReportDto.ReportHistResponse> toReportHistResponseList( List<Map<String, Object>> mapList);
 
     // 🔥 여기에 MapStruct가 사용할 커스텀 변환기 명시
     @Named("mapToLong")

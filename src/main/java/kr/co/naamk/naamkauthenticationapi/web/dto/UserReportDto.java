@@ -16,7 +16,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserPenaltyDto {
+public class UserReportDto {
     private Long id;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss", timezone = "Asia/Seoul")
@@ -91,6 +91,7 @@ public class UserPenaltyDto {
         private Timestamp penaltyCreatedAt;
         private String penaltyCreatedBy;
         private String penaltyDescription;
+        private String reportedUserProfileUrl;
 
         public String getPenaltyStatus() {
             return PenaltyStatusType.fromStatusValue(false, penalty).getStatusName();

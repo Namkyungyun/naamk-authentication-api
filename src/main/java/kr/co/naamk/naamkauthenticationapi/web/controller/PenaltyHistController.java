@@ -46,7 +46,8 @@ public class PenaltyHistController {
         // user 조회
         TbUsers user = penaltyHistService.getUserById( userId );
 
-        PenaltyHistDto result = penaltyHistService.saveUserPenalty( user.getId(), dto );
+        // penalty 처리
+        PenaltyHistDto result = penaltyHistService.saveUserPenalty( user.getId(), PenaltyType.user.name(), dto );
 
         // 알림 전송
         Long linkedId = user.getId(); // 해당 사용자의 id

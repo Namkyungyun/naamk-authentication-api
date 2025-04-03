@@ -30,18 +30,18 @@ public class PenaltyHistService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public PenaltyHistDto saveUserPenalty( Long userId, PenaltyHistDto.CreateRequest dto) throws ServiceException {
+    public PenaltyHistDto saveUserPenalty( Long userId, String type, PenaltyHistDto.CreateRequest dto) throws ServiceException {
+        // penalty
         TbPenaltyHist entity = PenaltyHistMapper.INSTANCE.toEntity( dto );
         entity.setLinkedId( userId );
-        entity.setType( PenaltyType.user.name() );
+        entity.setType( type );
 
         TbPenaltyHist savedEntity = penaltyHistRepository.save( entity );
 
-        // 신고 접수 처리됨 update
-        List< TbReportsHist > uncompletedReports = reportHistRepository.findByIsActiveTrueAndCreatedAtBefore( savedEntity.getCreatedAt() );
+        // report
+        List< TbReportsHist > uncompletedReports = reportHistRepository.findActiveReportsByLinkedIdAndType( userId, type );
         uncompletedReports.forEach( el -> el.setIsActive( false ) );
         reportHistRepository.saveAll( uncompletedReports );
-
 
         return PenaltyHistMapper.INSTANCE.toDto( savedEntity );
     }
