@@ -14,29 +14,33 @@ public interface PenaltyHistRepository extends JpaRepository< TbPenaltyHist, Lon
 
     @Query(nativeQuery = true, value = """
             SELECT
+            	(COUNT(*) OVER()) - ROW_NUMBER() OVER (ORDER BY ph.created_at DESC) + 1 AS rowNum,
                 ph.id,
                 ph.type,
-                ph.linked_id as linkedId,
-                ph.is_active as isActive,
+                ph.linked_id AS linkedId,
+                ph.is_active AS penalty,
                 ph.description,
-                ph.created_by as createdBy,
+                ph.created_by AS createdBy,
                 CAST(ph.created_at AS timestamp) as createdAt,
                 CASE
-                  WHEN rh.created_at IS NULL THEN false
-                  WHEN rh.created_at > ph.created_at
-                    AND ph.is_active = false THEN true
-                  ELSE false
-                END AS isExistReport
-            FROM community.penalty_hist ph
-            LEFT JOIN (SELECT linked_id, created_at
-                       FROM community.reports_hist
-                       WHERE type = :type -- user 신고 케이스만 확인
-                       AND is_active = true -- 신고 접수 상태 (미처리 상태)
-                       ) rh ON rh.linked_id = ph.linked_id -- userId 일치하는 경우
-            WHERE ph.linked_id = :userId
+            	    WHEN CAST(rh.is_active AS boolean) IS NULL THEN false   -- 접수된 신고 없음 -> false
+            	    WHEN CAST(ph.is_active AS boolean) IS true THEN false   -- 제재='정상' -> false
+            	    ELSE true                                               -- 제재='차단' -> true
+            	END AS isExistReport
+            FROM community.penalty_hist AS ph
+            LEFT JOIN LATERAL (
+            		SELECT *
+            		FROM community.reports_hist rh1
+            		WHERE rh1.type = :type
+            		AND rh1.updated_at >= ph.created_at
+            		AND rh1.created_at <= ph.created_at
+            		ORDER BY rh1.updated_at DESC
+            		LIMIT 1
+            	) rh ON true
+            WHERE ph.linked_id = :linkedId
             AND ph.type = :type
-            ORDER BY createdAt DESC
+            ORDER BY ph.created_at DESC
             """)
-    List< PenaltyHistDto > findPenaltyHistsByUserIdAndType( @Param( "userId" ) Long userId,
+    List< PenaltyHistDto > findPenaltyHistsByLinkedIdAndType( @Param( "linkedId" ) Long linkedId,
                                                      @Param( "type" ) String type );
 }

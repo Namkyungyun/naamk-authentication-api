@@ -11,10 +11,11 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Builder
 public class PenaltyHistDto {
+    private Long rowNum;
     private Long id;
     private String type;
     private Long linkedId;
-    private Boolean isActive;
+    private Boolean penalty;
     private String description;
     private String createdBy;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss", timezone = "Asia/Seoul")
@@ -22,7 +23,7 @@ public class PenaltyHistDto {
     private Boolean isExistReport;
 
     public String getPenaltyStatus() {
-        return PenaltyStatusType.fromStatusValue(true, isActive).getStatusName();
+        return PenaltyStatusType.fromStatusValue(true, penalty).getStatusName();
     }
 
     @Getter @Setter

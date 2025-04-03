@@ -26,7 +26,7 @@ public class PenaltyHistService {
 
     @Transactional(readOnly = true)
     public List<PenaltyHistDto> findHistListByUserIdAndType( Long userId, String type) throws ServiceException {
-        return  penaltyHistRepository.findPenaltyHistsByUserIdAndType( userId, type );
+        return  penaltyHistRepository.findPenaltyHistsByLinkedIdAndType( userId, type );
     }
 
     @Transactional(rollbackFor = Exception.class)
