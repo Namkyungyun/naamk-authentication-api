@@ -161,6 +161,7 @@ public interface ReportHistRepository extends JpaRepository< TbReportsHist, Long
 
     @Query(nativeQuery = true, value = """
             SELECT
+                (COUNT(*) OVER()) - ROW_NUMBER() OVER (ORDER BY rh.created_at DESC) + 1 AS rowNum,
                  rh.id,
                  rh.user_id AS reportUserId,
                  rh.linked_id AS reportedLinkId,

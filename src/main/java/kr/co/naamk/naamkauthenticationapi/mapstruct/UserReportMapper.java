@@ -45,6 +45,7 @@ public interface UserReportMapper {
     UserReportDto.UserDetailResponse toUserPenaltyDetailResponse( Map<String, Object> map);
 
 
+    @Mapping(target = "rowNum", source = "rowNum", qualifiedByName = "mapToLong")
     @Mapping(target = "id", source = "id", qualifiedByName = "mapToLong")
     @Mapping(target = "reportUserId", source = "reportUserId", qualifiedByName = "mapToLong")
     @Mapping(target = "reportedUserId", source = "reportedLinkId", qualifiedByName = "mapToLong")

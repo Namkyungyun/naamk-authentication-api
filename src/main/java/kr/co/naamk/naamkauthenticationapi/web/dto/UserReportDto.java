@@ -111,6 +111,7 @@ public class UserReportDto {
     @NoArgsConstructor
     @Builder
     public static class ReportHistResponse {
+        private Long rowNum;
         private Long id;
         private Long reportUserId;
         private Long reportedUserId;
