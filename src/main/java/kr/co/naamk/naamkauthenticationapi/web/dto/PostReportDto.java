@@ -1,10 +1,7 @@
 package kr.co.naamk.naamkauthenticationapi.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import kr.co.naamk.naamkauthenticationapi.domain.type.PenaltyStatusType;
-import kr.co.naamk.naamkauthenticationapi.domain.type.ReportStatusType;
-import kr.co.naamk.naamkauthenticationapi.domain.type.RoleType;
-import kr.co.naamk.naamkauthenticationapi.domain.type.SearchCommon;
+import kr.co.naamk.naamkauthenticationapi.domain.type.*;
 import lombok.*;
 
 import java.sql.Timestamp;
@@ -75,57 +72,31 @@ public class PostReportDto {
     @Builder
     public static class DetailResponse {
         private Long id;
-        private Long reportedUserId;
-        private String reportedUserName;
-        private String role; // 계정 상태 [user_role]
         private Boolean report = null;  // 접수 상태 [is_active]
-        private Boolean penalty = null; // 현재 패널티 상태 [is_active]
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss", timezone = "Asia/Seoul")
         private Timestamp latestCreatedAt;
+        private Long reportedUserId;
+        private String reportedUserName;
+        private Long reportedChannelId;
+        private String reportedChannelName;
+        private Long reportedPostId;
+        private String reportedPostContent;
+        private Boolean reportedPostActive;
+        private Boolean penalty = null; // 현재 패널티 상태 [is_active]
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss", timezone = "Asia/Seoul")
         private Timestamp penaltyCreatedAt;
         private String penaltyCreatedBy;
         private String penaltyDescription;
-        private String reportedUserProfileUrl;
 
+        public String getReportedPostStatus() {return PostStatusType.fromStatusValue(reportedPostActive).getStatusName();}
         public String getPenaltyStatus() {
             return PenaltyStatusType.fromStatusValue(false, penalty).getStatusName();
         }
-
-        public String getUserStatus() {
-            return RoleType.fromRoleName(role).getRoleNameKo();
-        }
-
         public List< Map< String, Object > > getPenaltyStatusList() {
             SearchCommon searchCommon = new SearchCommon();
             return searchCommon.penaltyStatus;
         }
     }
-
-    @Setter @Getter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
-    public static class ReportHistResponse {
-        private Long rowNum;
-        private Long id;
-        private Long reportUserId;
-        private Long reportedUserId;
-        private Boolean report = null;  // 접수 상태 [is_active]
-        private Boolean penalty = null; // 현재 패널티 상태 [is_active]
-        private String reportCreatedBy;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss", timezone = "Asia/Seoul")
-        private Timestamp reportCreatedAt;
-
-        public String getPenaltyStatus() {
-            return PenaltyStatusType.fromStatusValue(false, penalty).getStatusName();
-        }
-
-        public String getReportStatus() {
-            return ReportStatusType.fromStatusValue(report).getStatusName();
-        }
-    }
-
 
     // report test용
     @Setter @Getter

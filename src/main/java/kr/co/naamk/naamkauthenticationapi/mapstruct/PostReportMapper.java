@@ -34,29 +34,21 @@ public interface PostReportMapper {
     List< PostReportDto.ListResponse > toListResponseDtoList( List<Map<String, Object>> mapList);
 
     @Mapping(target = "id", source = "id", qualifiedByName = "mapToLong")
-    @Mapping(target = "reportedUserId", source = "reportLinkId", qualifiedByName = "mapToLong")
-    @Mapping(target = "reportedUserName", source = "reportedUserName", qualifiedByName = "mapToString")
     @Mapping(target = "report", source = "report", qualifiedByName = "mapToBoolean")
-    @Mapping(target = "penalty", source = "penalty", qualifiedByName = "mapToBoolean")
-    @Mapping(target = "role", source = "role", qualifiedByName = "mapToString")
     @Mapping(target = "latestCreatedAt", source = "latestCreatedAt", qualifiedByName = "mapToTimestamp")
-    @Mapping(target = "penaltyCreatedBy", source = "penaltyCreatedBy", qualifiedByName = "mapToString")
+    @Mapping(target = "reportedUserId", source = "reportedUserId", qualifiedByName = "mapToLong")
+    @Mapping(target = "reportedUserName", source = "reportedUserName", qualifiedByName = "mapToString")
+    @Mapping(target = "reportedChannelId", source = "reportedChannelId", qualifiedByName = "mapToLong")
+    @Mapping(target = "reportedChannelName", source = "reportedChannelName", qualifiedByName = "mapToString")
+    @Mapping(target = "reportedPostId", source = "reportedPostId", qualifiedByName = "mapToLong")
+    @Mapping(target = "reportedPostActive", source = "reportedPostActive", qualifiedByName = "mapToBoolean")
+    @Mapping(target = "reportedPostContent", source = "reportedPostContent", qualifiedByName = "mapToString")
+    @Mapping(target = "penalty", source = "penalty", qualifiedByName = "mapToBoolean")
     @Mapping(target = "penaltyCreatedAt", source = "penaltyCreatedAt", qualifiedByName = "mapToTimestamp")
+    @Mapping(target = "penaltyCreatedBy", source = "penaltyCreatedBy", qualifiedByName = "mapToString")
     @Mapping(target = "penaltyDescription", source = "penaltyDescription", qualifiedByName = "mapToString")
-    @Mapping(target = "reportedUserProfileUrl", source = "reportedUserProfileUrl", qualifiedByName = "mapToString")
     PostReportDto.DetailResponse toDetailResponse( Map<String, Object> map);
 
-
-    @Mapping(target = "rowNum", source = "rowNum", qualifiedByName = "mapToLong")
-    @Mapping(target = "id", source = "id", qualifiedByName = "mapToLong")
-    @Mapping(target = "reportUserId", source = "reportUserId", qualifiedByName = "mapToLong")
-    @Mapping(target = "reportedUserId", source = "reportedLinkId", qualifiedByName = "mapToLong")
-    @Mapping(target = "report", source = "report", qualifiedByName = "mapToBoolean")
-    @Mapping(target = "penalty", source = "penalty", qualifiedByName = "mapToBoolean")
-    @Mapping(target = "reportCreatedBy", source = "reportCreatedBy", qualifiedByName = "mapToString")
-    @Mapping(target = "reportCreatedAt", source = "reportCreatedAt", qualifiedByName = "mapToTimestamp")
-    PostReportDto.ReportHistResponse toReportHistResponse( Map<String, Object> map);
-    List< PostReportDto.ReportHistResponse> toReportHistResponseList( List<Map<String, Object>> mapList);
 
     // 🔥 여기에 MapStruct가 사용할 커스텀 변환기 명시
     @Named("mapToLong")

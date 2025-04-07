@@ -135,7 +135,7 @@ public interface ReportHistRepository extends JpaRepository< TbReportsHist, Long
                 SELECT DISTINCT ON (linked_id)
                        *
                 FROM community.reports_hist
-                WHERE type = :type
+                WHERE type = 'user'
                 ORDER BY linked_id, created_at DESC
             ) rh
             LEFT JOIN LATERAL (
@@ -146,7 +146,7 @@ public interface ReportHistRepository extends JpaRepository< TbReportsHist, Long
                     ph1.created_by,
                     ph1.description
                 FROM community.penalty_hist ph1
-                WHERE ph1.type = :type
+                WHERE ph1.type = 'user'
                 AND ph1.linked_id = rh.linked_id
                 ORDER BY ph1.created_at DESC
                 LIMIT 1
@@ -154,8 +154,7 @@ public interface ReportHistRepository extends JpaRepository< TbReportsHist, Long
             INNER JOIN public.users u ON u.id = rh.linked_id
             WHERE rh.linked_id = :userId
             """)
-    Optional< Map< String, Object > > findLatestUserReport( @Param("userId") Long userId,
-                                                            @Param("type") String type );
+    Optional< Map< String, Object > > findLatestUserReport( @Param("userId") Long userId);
 
 
     @Query(nativeQuery = true, value = """
@@ -165,7 +164,6 @@ public interface ReportHistRepository extends JpaRepository< TbReportsHist, Long
                  rh.user_id AS reportUserId,
                  rh.linked_id AS reportedLinkId,
                  rh.is_active AS report,
-                 rh.name AS reportedUserName,
                  ph.is_active AS penalty,
                  u.name AS reportCreatedBy,
                  rh.created_at AS reportCreatedAt
@@ -176,13 +174,11 @@ public interface ReportHistRepository extends JpaRepository< TbReportsHist, Long
                  rh1.linked_id,
                  rh1.is_active,
                  rh1.created_at,
-                 u1.name,
                  rh1.updated_at
-                 FROM community.reports_hist rh1, public.users u1
+                 FROM community.reports_hist rh1
                  WHERE rh1.type = :type
-                 AND rh1.linked_id = u1.id
-                 AND rh1.linked_id = :userId ) as rh
-            LEFT JOIN public.users u on u.id = rh.user_id -- 신고한 유저 정보
+                 AND rh1.linked_id = :linkedId ) as rh
+            INNER JOIN public.users u on u.id = rh.user_id -- 신고한 유저 정보
             LEFT JOIN LATERAL ( -- 가장 최신 페널티 정
                 SELECT *
                 FROM community.penalty_hist ph1
@@ -200,11 +196,11 @@ public interface ReportHistRepository extends JpaRepository< TbReportsHist, Long
                       FROM community.reports_hist rh1, public.users u1
                       WHERE rh1.type = :type
                       AND rh1.linked_id = u1.id
-                      AND rh1.linked_id = :userId
+                      AND rh1.linked_id = :linkedId
                     """)
-    Page< Map< String, Object > > findUserReportHists( @Param("userId") Long userId,
-                                                       @Param("type") String type,
-                                                       Pageable pageable );
+    Page< Map< String, Object > > findReportHistsByLinkedIdAndType( @Param("linkedId") Long linkedId,
+                                                                    @Param("type") String type,
+                                                                    Pageable pageable );
 
 
     /// post report
@@ -218,18 +214,15 @@ public interface ReportHistRepository extends JpaRepository< TbReportsHist, Long
                 c."name" AS reportedChannelName,        -- 채널 ID
                 rc.report_count as reportCount,         -- 해당 포스트에 대한 총 신고 건수
                 CAST(rh.is_active AS boolean) AS report,-- 신고처리 여부 [true:접수 / false:처리완료]
-                                                        -- 제재 처리 상태 [true:정상 / false;차단]
-                CASE
+                CASE                                    -- 제재 처리 상태 [true:정상 / false;차단]
                     WHEN rh.is_active = true THEN null
                     ELSE CAST(ph.is_active AS boolean)
                 END AS penalty,
-                                                        -- 제재 처리자
-                CASE
+                CASE                                    -- 제재 처리자
                     WHEN rh.is_active = true THEN null
                     ELSE ph.created_by
                 END AS penaltyCreatedBy,
-                                                        -- 제재 처리 일시
-                CASE
+                CASE                                    -- 제재 처리 일시
                     WHEN rh.is_active = true THEN null
                     ELSE ph.created_at
                 END AS penaltyCreatedAt
@@ -302,17 +295,69 @@ public interface ReportHistRepository extends JpaRepository< TbReportsHist, Long
                 AND (CAST(:startDate AS timestamp) IS NULL OR rh.created_at >= CAST(:startDate AS TIMESTAMP))
                 AND (CAST(:endDate AS timestamp) IS NULL OR rh.created_at < CAST(:endDate AS TIMESTAMP))
             """)
-    Page<Map<String,Object>> findAllPostReports( @Param("reportStatus") Boolean reportStatus,
-                                                 @Param( "penaltyStatus" ) Boolean penaltyStatus,
-                                                 @Param( "reportedUserName" ) String reportedUserName,
-                                                 @Param( "reportedChannelName" ) String reportedChannelName,
-                                                 @Param( "penaltyCreatedBy" ) String penaltyCreatedBy,
-                                                 @Param( "startDate" ) Timestamp startDate,
-                                                 @Param( "endDate" ) Timestamp endDate,
-                                                 Pageable pageable
-                                                 );
+    Page< Map< String, Object > > findAllPostReports( @Param("reportStatus") Boolean reportStatus,
+                                                      @Param("penaltyStatus") Boolean penaltyStatus,
+                                                      @Param("reportedUserName") String reportedUserName,
+                                                      @Param("reportedChannelName") String reportedChannelName,
+                                                      @Param("penaltyCreatedBy") String penaltyCreatedBy,
+                                                      @Param("startDate") Timestamp startDate,
+                                                      @Param("endDate") Timestamp endDate,
+                                                      Pageable pageable
+    );
 
 
+    @Query(nativeQuery = true, value = """
+            WITH lastest_reports AS (
+              SELECT *, ROW_NUMBER() OVER (PARTITION BY linked_id ORDER BY created_at DESC) AS rn
+              FROM community.reports_hist
+              WHERE type = 'post' AND linked_id = :postId
+            )
+            SELECT
+             rh.id,                                     -- report seq
+             rh.is_active as report,                    -- report active
+             rh.created_at as latestCreatedAt,          -- 최근 신고 일시
+             u.id as reportedUserId,                    -- 신고된 사용자 seq
+             u.name as reportedUserName,                -- 신고된 사용자 명
+             c.id as reportedChannelId,                 -- 신고된 채널 seq
+             c.name as reportedChannelName,             -- 신고된 채널 명
+             p.id as reportedPostId,                    -- 신고된 게시글 seq
+             p.is_active as reportedPostActive,         -- 신고된 게시글 active
+             p.content as reportedPostContent,          -- 신고된 게시글 내용
+             -- 제재 처리
+            CAST(ph.is_active AS boolean) as penalty,  -- 제재 처리 active
+            CASE                                        -- 처리 일시
+                WHEN rh.is_active = true THEN null
+                ELSE ph.created_at
+            END AS penaltyCreatedAt,
+            CASE                                        -- 처리자
+                WHEN rh.is_active = true THEN null
+                ELSE ph.created_by
+            END AS penaltyCreatedBy,
+             CASE                                       -- 처리 사유
+                WHEN rh.is_active = true THEN null
+                ELSE ph.description
+            END AS penaltyDescription
+            
+            FROM lastest_reports rh
+            LEFT JOIN LATERAL (
+                SELECT
+                    ph1.linked_id,
+                    ph1.is_active,
+                    ph1.created_at,
+                    ph1.created_by,
+                    ph1.description
+                FROM community.penalty_hist ph1
+                WHERE ph1.type = 'post'
+                AND ph1.linked_id = rh.linked_id
+                ORDER BY ph1.created_at DESC
+                LIMIT 1
+            ) ph ON true
+            INNER JOIN community.posts p ON p.id = rh.linked_id
+            INNER JOIN public.users u ON u.id = p.user_id
+            INNER JOIN community.channels c on c.id = p.channel_id
+            WHERE rn = 1
+            """)
+    Optional<Map<String, Object>> findLatestPostReport(@Param( "postId" ) Long postId);
 
 
     int countByTypeAndIsActiveTrueAndLinkedId( @Param("type") String type,

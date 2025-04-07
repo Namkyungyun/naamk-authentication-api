@@ -44,6 +44,20 @@ public class PostReportController {
                 .build();
     }
 
+    @GetMapping(value="/posts/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object getUserById(HttpServletRequest request, @PathVariable(value="postId") Long postId) {
+
+        PostReportDto.DetailResponse result = postReportService.findLatestPostReport( postId );
+
+        return APIResponseEntityBuilder.create()
+                .service( request )
+                .resultMessage( ServiceMessageType.SUCCESS )
+                .entity( result )
+                .build();
+    }
+
+
+
     @PostMapping(value = "/report", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object createReport(HttpServletRequest request, @RequestBody PostReportDto.CreateRequest dto){
         Object result = postReportService.createPostReport( dto );
@@ -53,32 +67,19 @@ public class PostReportController {
                 .entity( result )
                 .build();
     }
-//
-//
-//    @GetMapping(value="/posts/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Object getUserById(HttpServletRequest request, @PathVariable(value="postId") Long postId) {
-//
-//        PostReportDto.DetailResponse result = postReportService.findLatestPostReport( postId );
-//
-//        return APIResponseEntityBuilder.create()
-//                .service( request )
-//                .resultMessage( ServiceMessageType.SUCCESS )
-//                .entity( result )
-//                .build();
-//    }
-//
-//    @GetMapping(value="/posts/{postId}/report-hist", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Object getUserReportHistById(HttpServletRequest request,
-//                                        @PathVariable(value="postId") Long postId,
-//                                        Pageable pageable) {
-//
-//        Map<String, Object> result = userReportService.findPostReportHist( postId , pageable);
-//
-//        return APIResponseEntityBuilder.create()
-//                .service( request )
-//                .resultMessage( ServiceMessageType.SUCCESS )
-//                .entity( result )
-//                .build();
-//    }
+
+    @GetMapping(value="/posts/{postId}/report-hist", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object getUserReportHistById(HttpServletRequest request,
+                                        @PathVariable(value="postId") Long postId,
+                                        Pageable pageable) {
+
+        Map<String, Object> result = postReportService.findPostReportHist( postId , pageable);
+
+        return APIResponseEntityBuilder.create()
+                .service( request )
+                .resultMessage( ServiceMessageType.SUCCESS )
+                .entity( result )
+                .build();
+    }
 
 }

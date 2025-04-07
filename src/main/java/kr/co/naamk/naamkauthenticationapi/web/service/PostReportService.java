@@ -1,13 +1,15 @@
 package kr.co.naamk.naamkauthenticationapi.web.service;
 
-import kr.co.naamk.naamkauthenticationapi.domain.common.TbUsers;
 import kr.co.naamk.naamkauthenticationapi.domain.community.TbPost;
 import kr.co.naamk.naamkauthenticationapi.domain.community.TbReportsHist;
+import kr.co.naamk.naamkauthenticationapi.domain.type.ReportType;
 import kr.co.naamk.naamkauthenticationapi.domain.type.SearchCommon;
+import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
+import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
 import kr.co.naamk.naamkauthenticationapi.mapstruct.PostReportMapper;
-import kr.co.naamk.naamkauthenticationapi.mapstruct.UserReportMapper;
+import kr.co.naamk.naamkauthenticationapi.mapstruct.ReportMapper;
 import kr.co.naamk.naamkauthenticationapi.web.dto.PostReportDto;
-import kr.co.naamk.naamkauthenticationapi.web.dto.UserReportDto;
+import kr.co.naamk.naamkauthenticationapi.web.dto.ReportHistDto;
 import kr.co.naamk.naamkauthenticationapi.web.repository.PostRepository;
 import kr.co.naamk.naamkauthenticationapi.web.repository.ReportHistRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +65,44 @@ public class PostReportService {
 
 
         return new PageImpl<>( contents, pageable, page.getTotalElements() );
+    }
+
+
+    @Transactional(readOnly = true)
+    public PostReportDto.DetailResponse findLatestPostReport( Long postId ) throws ServiceException {
+        TbPost post = postRepository.findById( postId )
+                .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "not found post" ) );
+
+        Map< String, Object > map = reportHistRepository.findLatestPostReport( post.getId())
+                .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "not found report" ) );
+
+        return PostReportMapper.INSTANCE.toDetailResponse( map );
+    }
+
+
+    @Transactional(readOnly = true)
+    public Map< String, Object > findPostReportHist( Long postId, Pageable pageable ) {
+        TbPost post = postRepository.findById( postId )
+                .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "not found post" ) );
+
+
+        pageable = PageRequest.of( Math.max( pageable.getPageNumber(), 0 ), pageable.getPageSize() );
+        Page< Map< String, Object > > page = reportHistRepository.findReportHistsByLinkedIdAndType(
+                post.getId(),
+                ReportType.post.getName(),
+                pageable
+        );
+
+        List< ReportHistDto > contents = ReportMapper.INSTANCE.toReportHistResponseList( page.getContent() );
+        PageImpl< ReportHistDto > pageImpl = new PageImpl<>( contents, pageable, contents.size() );
+
+        int newReportCount = reportHistRepository.countByTypeAndIsActiveTrueAndLinkedId(  ReportType.post.getName(), post.getId() );
+
+        Map< String, Object > result = new HashMap<>();
+        result.put( "pagenation", pageImpl );
+        result.put( "newReportCount", newReportCount );
+
+        return result;
     }
 
 

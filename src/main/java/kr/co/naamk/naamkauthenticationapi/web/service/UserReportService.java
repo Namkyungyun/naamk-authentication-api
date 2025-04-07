@@ -5,7 +5,9 @@ import kr.co.naamk.naamkauthenticationapi.domain.community.TbReportsHist;
 import kr.co.naamk.naamkauthenticationapi.domain.type.SearchCommon;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
+import kr.co.naamk.naamkauthenticationapi.mapstruct.ReportMapper;
 import kr.co.naamk.naamkauthenticationapi.mapstruct.UserReportMapper;
+import kr.co.naamk.naamkauthenticationapi.web.dto.ReportHistDto;
 import kr.co.naamk.naamkauthenticationapi.web.dto.UserReportDto;
 import kr.co.naamk.naamkauthenticationapi.web.repository.ReportHistRepository;
 import kr.co.naamk.naamkauthenticationapi.web.repository.UserRepository;
@@ -70,7 +72,7 @@ public class UserReportService {
         TbUsers user = userRepository.findById( userId )
                 .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "not found user" ) );
 
-        Map< String, Object > map = reportHistRepository.findLatestUserReport( user.getId(), "user" )
+        Map< String, Object > map = reportHistRepository.findLatestUserReport( user.getId())
                 .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "not found report" ) );
 
         if ( map.isEmpty() ) {
@@ -91,14 +93,14 @@ public class UserReportService {
 
 
         pageable = PageRequest.of( Math.max( pageable.getPageNumber(), 0 ), pageable.getPageSize() );
-        Page< Map< String, Object > > page = reportHistRepository.findUserReportHists(
+        Page< Map< String, Object > > page = reportHistRepository.findReportHistsByLinkedIdAndType(
                 user.getId(),
                 "user",
                 pageable
         );
 
-        List< UserReportDto.ReportHistResponse > contents = UserReportMapper.INSTANCE.toReportHistResponseList( page.getContent() );
-        PageImpl< UserReportDto.ReportHistResponse > pageImpl = new PageImpl<>( contents, pageable, contents.size() );
+        List< ReportHistDto > contents = ReportMapper.INSTANCE.toReportHistResponseList( page.getContent() );
+        PageImpl< ReportHistDto > pageImpl = new PageImpl<>( contents, pageable, contents.size() );
 
         int newReportCount = reportHistRepository.countByTypeAndIsActiveTrueAndLinkedId( "user", userId );
 
