@@ -58,7 +58,7 @@ public class UserReportService {
                 pageable
         );
 
-        List< UserReportDto > contents = UserReportMapper.INSTANCE.toUserPenaltyDtoList( page.getContent() );
+        List< UserReportDto > contents = UserReportMapper.INSTANCE.toUserReportDtoList( page.getContent() );
 
 
         return new PageImpl<>( contents, pageable, page.getTotalElements() );
@@ -77,7 +77,7 @@ public class UserReportService {
             throw new ServiceException( ServiceMessageType.NOT_FOUND, "not found report" );
         }
 
-        UserReportDto.UserDetailResponse dto = UserReportMapper.INSTANCE.toUserPenaltyDetailResponse( map );
+        UserReportDto.UserDetailResponse dto = UserReportMapper.INSTANCE.toUserReportDetailResponse( map );
         dto.setReportedUserProfileUrl( "http://52.78.70.99:9002/profile/" + userId );
 
         return dto;

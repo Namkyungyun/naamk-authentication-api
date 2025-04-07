@@ -31,7 +31,18 @@ public class PenaltyHistDto {
     @NoArgsConstructor
     @Builder
     public static class CreateRequest {
-        private String name;
+        private Boolean isActive;
+        private String description;
+    }
+
+    @Getter @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class CreateResponse {
+        private String username;
+        private Long linkedId;
+        private String type;
         private Boolean isActive;
         private String description;
     }

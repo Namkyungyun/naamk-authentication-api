@@ -23,7 +23,7 @@ public interface ReportHistRepository extends JpaRepository< TbReportsHist, Long
             AND type = :type
             AND is_active = true
             """)
-    List< TbReportsHist > findActiveReportsByLinkedIdAndType( @Param("linkedId") Long linkedId, @Param( "type" ) String type);
+    List< TbReportsHist > findActiveReportsByLinkedIdAndType( @Param("linkedId") Long linkedId, @Param("type") String type );
 
 
     @Query(nativeQuery = true, value = """
@@ -39,7 +39,6 @@ public interface ReportHistRepository extends JpaRepository< TbReportsHist, Long
                     WHEN rh.is_active = true THEN null
                     ELSE CAST(ph.is_active AS boolean)
                 END AS penalty,
-                rh.created_at as latestCreatedAt,
                 -- 처리자
                 CASE
                     WHEN rh.is_active = true THEN null
@@ -206,6 +205,114 @@ public interface ReportHistRepository extends JpaRepository< TbReportsHist, Long
     Page< Map< String, Object > > findUserReportHists( @Param("userId") Long userId,
                                                        @Param("type") String type,
                                                        Pageable pageable );
+
+
+    /// post report
+    @Query(nativeQuery = true, value = """
+            SELECT
+            	(COUNT(*) OVER()) - ROW_NUMBER() OVER (ORDER BY rh.created_at DESC) + 1 AS rowNum,
+            	rh.id,                                  -- report seq
+                rh.created_at AS latestCreatedAt,       -- report created at
+                rh.linked_id AS reportedPostId,         -- post seq
+                u."name" AS reportedUserName,           -- 작성자 ID
+                c."name" AS reportedChannelName,        -- 채널 ID
+                rc.report_count as reportCount,         -- 해당 포스트에 대한 총 신고 건수
+                CAST(rh.is_active AS boolean) AS report,-- 신고처리 여부 [true:접수 / false:처리완료]
+                                                        -- 제재 처리 상태 [true:정상 / false;차단]
+                CASE
+                    WHEN rh.is_active = true THEN null
+                    ELSE CAST(ph.is_active AS boolean)
+                END AS penalty,
+                                                        -- 제재 처리자
+                CASE
+                    WHEN rh.is_active = true THEN null
+                    ELSE ph.created_by
+                END AS penaltyCreatedBy,
+                                                        -- 제재 처리 일시
+                CASE
+                    WHEN rh.is_active = true THEN null
+                    ELSE ph.created_at
+                END AS penaltyCreatedAt
+            -- 일차로 포스트에 대한 linked_id 를 가져오기
+            FROM (
+                    SELECT DISTINCT ON (linked_id) *
+                    FROM community.reports_hist
+                    WHERE type = 'post'
+                    ORDER BY linked_id, created_at desc) as rh
+            -- 최신 제재 건
+            LEFT JOIN LATERAL (
+                      SELECT ph1.linked_id, ph1.is_active, ph1.created_at, ph1.created_by
+                      FROM community.penalty_hist ph1
+                      WHERE ph1.type = 'post'
+                    AND ph1.linked_id = rh.linked_id
+                  ORDER BY ph1.created_at DESC
+                  LIMIT 1
+             ) ph ON true
+             -- 포스트
+             INNER JOIN community.posts p ON p.id = rh.linked_id
+             -- 사용자
+             LEFT JOIN public.users u ON u.id = p.user_id
+             -- 채널
+             LEFT JOIN community.channels c ON c.id = p.channel_id
+             -- 전체 신고 건수
+             LEFT JOIN (
+              SELECT linked_id, COUNT(*) AS report_count
+              FROM community.reports_hist
+              WHERE type = 'post'
+              GROUP BY linked_id
+            ) rc ON rc.linked_id = rh.linked_id
+            WHERE
+                (:reportStatus IS NULL OR rh.is_active = CAST(:reportStatus AS BOOLEAN))
+                AND (:penaltyStatus IS NULL OR (rh.is_active =false AND ph.is_active = CAST(:penaltyStatus AS boolean)))
+                AND (:reportedUserName IS NULL OR u."name" LIKE CONCAT(:reportedUserName, '%') )
+                AND (:reportedChannelName IS NULL OR c."name" LIKE CONCAT(:reportedChannelName, '%') )
+                AND (:penaltyCreatedBy IS NULL OR (rh.is_active = false AND  ph.created_by LIKE CONCAT(:penaltyCreatedBy, '%')) )
+                AND (CAST(:startDate AS timestamp) IS NULL OR rh.created_at >= CAST(:startDate AS TIMESTAMP))
+                AND (CAST(:endDate AS timestamp) IS NULL OR rh.created_at < CAST(:endDate AS TIMESTAMP))
+            ORDER BY rh.created_at DESC, rh.id desc
+            """, countQuery = """
+            SELECT count(*)
+            -- 일차로 포스트에 대한 linked_id 를 가져오기
+            FROM (
+                    SELECT DISTINCT ON (linked_id) *
+                    FROM community.reports_hist
+                    WHERE type = 'post'
+                    ORDER BY linked_id, created_at desc) as rh
+            -- 최신 제재 건
+            LEFT JOIN LATERAL (
+                      SELECT ph1.linked_id, ph1.is_active, ph1.created_at, ph1.created_by
+                      FROM community.penalty_hist ph1
+                      WHERE ph1.type = 'post'
+                    AND ph1.linked_id = rh.linked_id
+                  ORDER BY ph1.created_at DESC
+                  LIMIT 1
+             ) ph ON true
+             -- 포스트
+             INNER JOIN community.posts p ON p.id = rh.linked_id
+             -- 사용자
+             LEFT JOIN public.users u ON u.id = p.user_id
+             -- 채널
+             LEFT JOIN community.channels c ON c.id = p.channel_id
+            WHERE
+                (:reportStatus IS NULL OR rh.is_active = CAST(:reportStatus AS BOOLEAN))
+                AND (:penaltyStatus IS NULL OR (rh.is_active =false AND ph.is_active = CAST(:penaltyStatus AS boolean)))
+                AND (:reportedUserName IS NULL OR u."name" LIKE CONCAT(:reportedUserName, '%') )
+                AND (:reportedChannelName IS NULL OR c."name" LIKE CONCAT(:reportedChannelName, '%') )
+                AND (:penaltyCreatedBy IS NULL OR (rh.is_active = false AND  ph.created_by LIKE CONCAT(:penaltyCreatedBy, '%')) )
+                AND (CAST(:startDate AS timestamp) IS NULL OR rh.created_at >= CAST(:startDate AS TIMESTAMP))
+                AND (CAST(:endDate AS timestamp) IS NULL OR rh.created_at < CAST(:endDate AS TIMESTAMP))
+            """)
+    Page<Map<String,Object>> findAllPostReports( @Param("reportStatus") Boolean reportStatus,
+                                                 @Param( "penaltyStatus" ) Boolean penaltyStatus,
+                                                 @Param( "reportedUserName" ) String reportedUserName,
+                                                 @Param( "reportedChannelName" ) String reportedChannelName,
+                                                 @Param( "penaltyCreatedBy" ) String penaltyCreatedBy,
+                                                 @Param( "startDate" ) Timestamp startDate,
+                                                 @Param( "endDate" ) Timestamp endDate,
+                                                 Pageable pageable
+                                                 );
+
+
 
 
     int countByTypeAndIsActiveTrueAndLinkedId( @Param("type") String type,

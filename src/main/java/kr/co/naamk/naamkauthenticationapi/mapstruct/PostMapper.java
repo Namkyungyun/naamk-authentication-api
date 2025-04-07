@@ -1,6 +1,8 @@
 package kr.co.naamk.naamkauthenticationapi.mapstruct;
 
+import kr.co.naamk.naamkauthenticationapi.domain.community.TbPost;
 import kr.co.naamk.naamkauthenticationapi.domain.community.TbReportsHist;
+import kr.co.naamk.naamkauthenticationapi.web.dto.PostDto;
 import kr.co.naamk.naamkauthenticationapi.web.dto.UserReportDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -9,40 +11,40 @@ import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, unmappedSourcePolicy = ReportingPolicy.IGNORE)
-public interface UserReportMapper {
-    UserReportMapper INSTANCE = Mappers.getMapper( UserReportMapper.class );
-
-    TbReportsHist toEntity( UserReportDto.CreateRequest dto);
+public interface PostMapper {
+    PostMapper INSTANCE = Mappers.getMapper( PostMapper.class );
 
     @Mapping(target = "rowNum", source = "rowNum", qualifiedByName = "mapToLong")
     @Mapping(target = "id", source = "id", qualifiedByName = "mapToLong")
-    @Mapping(target = "latestCreatedAt", source = "latestCreatedAt", qualifiedByName = "mapToTimestamp")
-    @Mapping(target = "reportedUserId", source = "reportedUserId", qualifiedByName = "mapToLong")
-    @Mapping(target = "reportedUserName", source = "reportedUserName", qualifiedByName = "mapToString")
-    @Mapping(target = "reportCount", source = "reportCount", qualifiedByName = "mapToLong")
-    @Mapping(target = "report", source = "report", qualifiedByName = "mapToBoolean")
+    @Mapping(target = "type", source = "type", qualifiedByName = "mapToString")
+    @Mapping(target = "content", source = "content", qualifiedByName = "mapToString")
+    @Mapping(target = "userName", source = "userName", qualifiedByName = "mapToString")
+    @Mapping(target = "channelName", source = "channelName", qualifiedByName = "mapToString")
     @Mapping(target = "penalty", source = "penalty", qualifiedByName = "mapToBoolean")
-    @Mapping(target = "penaltyCreatedBy", source = "penaltyCreatedBy", qualifiedByName = "mapToString")
-    @Mapping(target = "penaltyCreatedAt", source = "penaltyCreatedAt", qualifiedByName = "mapToTimestamp")
-    UserReportDto toUserReportDto( Map<String, Object> map);
-    List< UserReportDto > toUserReportDtoList( List<Map<String, Object>> mapList);
+    @Mapping(target = "createdAt", source = "createdAt", qualifiedByName = "mapToTimestamp")
+    PostDto toPostDto( Map<String, Object> map);
+    List< PostDto > toPostDtoList( List<Map<String, Object>> mapList);
 
-    @Mapping(target = "id", source = "id", qualifiedByName = "mapToLong")
-    @Mapping(target = "reportedUserId", source = "reportLinkId", qualifiedByName = "mapToLong")
-    @Mapping(target = "reportedUserName", source = "reportedUserName", qualifiedByName = "mapToString")
-    @Mapping(target = "report", source = "report", qualifiedByName = "mapToBoolean")
+    @Mapping(target = "postId", source = "postId", qualifiedByName = "mapToLong")
+    @Mapping(target = "createdAt", source = "createdAt", qualifiedByName = "mapToTimestamp")
+    @Mapping(target = "content", source = "content", qualifiedByName = "mapToString")
+    @Mapping(target = "postStatus", source = "postStatus", qualifiedByName = "mapToString")
+    @Mapping(target = "channelPenaltyStatus", source = "channelPenaltyStatus", qualifiedByName = "mapToString")
     @Mapping(target = "penalty", source = "penalty", qualifiedByName = "mapToBoolean")
-    @Mapping(target = "role", source = "role", qualifiedByName = "mapToString")
-    @Mapping(target = "latestCreatedAt", source = "latestCreatedAt", qualifiedByName = "mapToTimestamp")
-    @Mapping(target = "penaltyCreatedBy", source = "penaltyCreatedBy", qualifiedByName = "mapToString")
-    @Mapping(target = "penaltyCreatedAt", source = "penaltyCreatedAt", qualifiedByName = "mapToTimestamp")
-    @Mapping(target = "penaltyDescription", source = "penaltyDescription", qualifiedByName = "mapToString")
-    @Mapping(target = "reportedUserProfileUrl", source = "reportedUserProfileUrl", qualifiedByName = "mapToString")
-    UserReportDto.UserDetailResponse toUserReportDetailResponse( Map<String, Object> map);
+    @Mapping(target = "channelName", source = "channelName", qualifiedByName = "mapToString")
+    @Mapping(target = "channelNickName", source = "channelNickName", qualifiedByName = "mapToString")
+    @Mapping(target = "userName", source = "userName", qualifiedByName = "mapToString")
+    @Mapping(target = "userId", source = "userId", qualifiedByName = "mapToLong")
+    @Mapping(target = "popScore", source = "popScore", qualifiedByName = "mapToLong")
+    @Mapping(target = "likeCount", source = "likeCount", qualifiedByName = "mapToLong")
+    @Mapping(target = "replyCount", source = "replyCount", qualifiedByName = "mapToLong")
+    @Mapping(target = "thumbs", source = "thumbs", qualifiedByName = "mapToStringList")
+    PostDto.PostDetailResponse toPostDetailResponse( Map<String, Object> map);
 
 
     @Mapping(target = "rowNum", source = "rowNum", qualifiedByName = "mapToLong")
@@ -74,6 +76,27 @@ public interface UserReportMapper {
     default String mapToString(Object value) {
         return value != null ? value.toString() : null;
     }
+
+
+    @Named("mapToStringList")
+    default List<String> mapToStringList(Object value) {
+        if (value == null) return null;
+
+        if (value instanceof List<?> list) {
+            return list.stream()
+                    .map(Object::toString)
+                    .toList();
+        }
+
+        if (value instanceof Object[] arr) {
+            return Arrays.stream(arr)
+                    .map(Object::toString)
+                    .toList();
+        }
+
+        return List.of(value.toString()); // 단일 값인 경우
+    }
+
 
     @Named("mapToTimestamp")
     default Timestamp mapToTimestamp(Object value) {

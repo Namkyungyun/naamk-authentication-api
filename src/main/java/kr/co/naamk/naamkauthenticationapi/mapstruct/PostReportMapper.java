@@ -1,6 +1,7 @@
 package kr.co.naamk.naamkauthenticationapi.mapstruct;
 
 import kr.co.naamk.naamkauthenticationapi.domain.community.TbReportsHist;
+import kr.co.naamk.naamkauthenticationapi.web.dto.PostReportDto;
 import kr.co.naamk.naamkauthenticationapi.web.dto.UserReportDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,23 +14,24 @@ import java.util.List;
 import java.util.Map;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, unmappedSourcePolicy = ReportingPolicy.IGNORE)
-public interface UserReportMapper {
-    UserReportMapper INSTANCE = Mappers.getMapper( UserReportMapper.class );
+public interface PostReportMapper {
+    PostReportMapper INSTANCE = Mappers.getMapper( PostReportMapper.class );
 
-    TbReportsHist toEntity( UserReportDto.CreateRequest dto);
+    TbReportsHist toEntity( PostReportDto.CreateRequest dto);
 
     @Mapping(target = "rowNum", source = "rowNum", qualifiedByName = "mapToLong")
     @Mapping(target = "id", source = "id", qualifiedByName = "mapToLong")
     @Mapping(target = "latestCreatedAt", source = "latestCreatedAt", qualifiedByName = "mapToTimestamp")
-    @Mapping(target = "reportedUserId", source = "reportedUserId", qualifiedByName = "mapToLong")
+    @Mapping(target = "reportedPostId", source = "reportedPostId", qualifiedByName = "mapToLong")
     @Mapping(target = "reportedUserName", source = "reportedUserName", qualifiedByName = "mapToString")
+    @Mapping(target = "reportedChannelName", source = "reportedChannelName", qualifiedByName = "mapToString")
     @Mapping(target = "reportCount", source = "reportCount", qualifiedByName = "mapToLong")
     @Mapping(target = "report", source = "report", qualifiedByName = "mapToBoolean")
     @Mapping(target = "penalty", source = "penalty", qualifiedByName = "mapToBoolean")
     @Mapping(target = "penaltyCreatedBy", source = "penaltyCreatedBy", qualifiedByName = "mapToString")
     @Mapping(target = "penaltyCreatedAt", source = "penaltyCreatedAt", qualifiedByName = "mapToTimestamp")
-    UserReportDto toUserReportDto( Map<String, Object> map);
-    List< UserReportDto > toUserReportDtoList( List<Map<String, Object>> mapList);
+    PostReportDto.ListResponse toListResponseDto( Map<String, Object> map);
+    List< PostReportDto.ListResponse > toListResponseDtoList( List<Map<String, Object>> mapList);
 
     @Mapping(target = "id", source = "id", qualifiedByName = "mapToLong")
     @Mapping(target = "reportedUserId", source = "reportLinkId", qualifiedByName = "mapToLong")
@@ -42,7 +44,7 @@ public interface UserReportMapper {
     @Mapping(target = "penaltyCreatedAt", source = "penaltyCreatedAt", qualifiedByName = "mapToTimestamp")
     @Mapping(target = "penaltyDescription", source = "penaltyDescription", qualifiedByName = "mapToString")
     @Mapping(target = "reportedUserProfileUrl", source = "reportedUserProfileUrl", qualifiedByName = "mapToString")
-    UserReportDto.UserDetailResponse toUserReportDetailResponse( Map<String, Object> map);
+    PostReportDto.DetailResponse toDetailResponse( Map<String, Object> map);
 
 
     @Mapping(target = "rowNum", source = "rowNum", qualifiedByName = "mapToLong")
@@ -53,8 +55,8 @@ public interface UserReportMapper {
     @Mapping(target = "penalty", source = "penalty", qualifiedByName = "mapToBoolean")
     @Mapping(target = "reportCreatedBy", source = "reportCreatedBy", qualifiedByName = "mapToString")
     @Mapping(target = "reportCreatedAt", source = "reportCreatedAt", qualifiedByName = "mapToTimestamp")
-    UserReportDto.ReportHistResponse toReportHistResponse( Map<String, Object> map);
-    List< UserReportDto.ReportHistResponse> toReportHistResponseList( List<Map<String, Object>> mapList);
+    PostReportDto.ReportHistResponse toReportHistResponse( Map<String, Object> map);
+    List< PostReportDto.ReportHistResponse> toReportHistResponseList( List<Map<String, Object>> mapList);
 
     // 🔥 여기에 MapStruct가 사용할 커스텀 변환기 명시
     @Named("mapToLong")

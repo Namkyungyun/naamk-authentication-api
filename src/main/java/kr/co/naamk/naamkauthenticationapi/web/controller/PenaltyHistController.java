@@ -11,6 +11,8 @@ import kr.co.naamk.naamkauthenticationapi.web.dto.apiResponse.APIResponseEntityB
 import kr.co.naamk.naamkauthenticationapi.web.service.PenaltyHistService;
 import kr.co.naamk.naamkauthenticationapi.web.service.RedisService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,13 +26,14 @@ public class PenaltyHistController {
     private final PenaltyHistService penaltyHistService;
     private final RedisService redisService;
 
-    @GetMapping(value = "/users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object getUserPenaltyHistByUserId( HttpServletRequest request, @PathVariable(value = "userId") long userId ) {
-        // user 조회
-        TbUsers user = penaltyHistService.getUserById( userId );
-
+    @GetMapping(value = "/{type}/{linkedId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object getUserPenaltyHistByUserId( HttpServletRequest request,
+                                              @PathVariable(value="type") String type,
+                                              @PathVariable(value = "linkedId") Long linkedId,
+                                              Pageable pageable
+                                              ) {
         // user data 저장
-        List< PenaltyHistDto > result = penaltyHistService.findHistListByUserIdAndType( user.getId(), PenaltyType.user.name() );
+        Page< PenaltyHistDto > result = penaltyHistService.findUserPenaltyHistListByUserId( linkedId, type, pageable);
 
         return APIResponseEntityBuilder.create()
                 .service( request )
@@ -39,20 +42,17 @@ public class PenaltyHistController {
                 .build();
     }
 
-    @PostMapping(value="/users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value="/{type}/{linkedId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object createUserPenaltyHist( HttpServletRequest request,
-                                         @PathVariable(value = "userId") long userId,
+                                         @PathVariable(value = "linkedId") Long linkedId,
+                                         @PathVariable(value="type") String type,
                                          @RequestBody PenaltyHistDto.CreateRequest dto) {
-        // user 조회
-        TbUsers user = penaltyHistService.getUserById( userId );
-
         // penalty 처리
-        PenaltyHistDto result = penaltyHistService.saveUserPenalty( user.getId(), PenaltyType.user.name(), dto );
+        PenaltyHistDto.CreateResponse result = penaltyHistService.saveUserPenalty( linkedId, type, dto );
 
         // 알림 전송
-        Long linkedId = user.getId(); // 해당 사용자의 id
         Boolean isBlock = !dto.getIsActive(); // 제제 여부  [ isActive:true = 정상 | isActive:false = 차단 ]
-        redisService.saveNotificationPenalty( user.getUsername(), NotificationType.user, isBlock, linkedId );
+        redisService.saveNotificationPenalty( result.getUsername(), NotificationType.fromTypeName( type ), isBlock, linkedId );
 
         return APIResponseEntityBuilder.create()
                 .service( request )
