@@ -1,4 +1,4 @@
-package kr.co.naamk.naamkauthenticationapi.web.repository;
+package kr.co.naamk.naamkauthenticationapi.web.repository.admin;
 
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoles;
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoleMenus;

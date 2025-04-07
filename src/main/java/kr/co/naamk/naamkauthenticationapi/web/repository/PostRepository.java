@@ -46,6 +46,24 @@ public interface PostRepository extends JpaRepository< TbPost , Long > {
               AND (CAST(:startDate AS timestamp) IS NULL OR p.created_at >= CAST(:startDate AS TIMESTAMP))
               AND (CAST(:endDate AS timestamp) IS NULL OR p.created_at < CAST(:endDate AS TIMESTAMP))
             ORDER BY p.created_at DESC
+            """, countQuery = """
+            SELECT count(*)
+            FROM community.posts p
+            INNER JOIN public.users u on u.id = p.user_id
+            INNER JOIN community.channels c on c.id = p.channel_id
+            LEFT JOIN LATERAL (
+            	SELECT ph1.is_active
+            	FROM community.penalty_hist ph1
+            	WHERE ph1.linked_id = p.id
+            	  AND ph1.type = 'post'
+            	ORDER BY ph1.created_at DESC
+            	LIMIT 1
+            	) ph ON true
+             WHERE (:penaltyStatus IS NULL OR COALESCE(ph.is_active, true) = CAST(:penaltyStatus AS boolean))
+              AND (:userName IS NULL OR u."name" LIKE CONCAT(:userName, '%'))
+              AND (:channelName IS NULL OR c."name" LIKE CONCAT(:channelName, '%'))
+              AND (CAST(:startDate AS timestamp) IS NULL OR p.created_at >= CAST(:startDate AS TIMESTAMP))
+              AND (CAST(:endDate AS timestamp) IS NULL OR p.created_at < CAST(:endDate AS TIMESTAMP))
             """)
     Page< Map<String, Object> > findPostsWithPenalty(
             @Param( "penaltyStatus" ) Boolean penaltyStatus,

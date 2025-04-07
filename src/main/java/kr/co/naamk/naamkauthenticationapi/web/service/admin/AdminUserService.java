@@ -1,18 +1,18 @@
-package kr.co.naamk.naamkauthenticationapi.web.service;
+package kr.co.naamk.naamkauthenticationapi.web.service.admin;
 
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoles;
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminUserRoles;
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminUsers;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
-import kr.co.naamk.naamkauthenticationapi.mapstruct.AdminUserMapper;
+import kr.co.naamk.naamkauthenticationapi.mapstruct.admin.AdminUserMapper;
 import kr.co.naamk.naamkauthenticationapi.utils.DateUtil;
 import kr.co.naamk.naamkauthenticationapi.utils.SecurityUtil;
-import kr.co.naamk.naamkauthenticationapi.web.dto.AdminAuthDto;
-import kr.co.naamk.naamkauthenticationapi.web.dto.AdminUserDto;
-import kr.co.naamk.naamkauthenticationapi.web.repository.AdminRoleRepository;
-import kr.co.naamk.naamkauthenticationapi.web.repository.AdminUserRepository;
-import kr.co.naamk.naamkauthenticationapi.web.repository.AdminUserRolesRepository;
+import kr.co.naamk.naamkauthenticationapi.web.dto.admin.AdminAuthDto;
+import kr.co.naamk.naamkauthenticationapi.web.dto.admin.AdminUserDto;
+import kr.co.naamk.naamkauthenticationapi.web.repository.admin.AdminRoleRepository;
+import kr.co.naamk.naamkauthenticationapi.web.repository.admin.AdminUserRepository;
+import kr.co.naamk.naamkauthenticationapi.web.repository.admin.AdminUserRolesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

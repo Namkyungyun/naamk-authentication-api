@@ -2,7 +2,6 @@ package kr.co.naamk.naamkauthenticationapi.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import kr.co.naamk.naamkauthenticationapi.domain.type.PenaltyStatusType;
-import kr.co.naamk.naamkauthenticationapi.domain.type.RoleType;
 import kr.co.naamk.naamkauthenticationapi.domain.type.SearchCommon;
 import lombok.*;
 

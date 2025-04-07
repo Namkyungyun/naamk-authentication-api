@@ -1,11 +1,11 @@
-package kr.co.naamk.naamkauthenticationapi.web.controller;
+package kr.co.naamk.naamkauthenticationapi.web.controller.admin;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
 import kr.co.naamk.naamkauthenticationapi.redis.model.RedisRoleEntity;
-import kr.co.naamk.naamkauthenticationapi.web.dto.AdminAuthDto;
+import kr.co.naamk.naamkauthenticationapi.web.dto.admin.AdminAuthDto;
 import kr.co.naamk.naamkauthenticationapi.web.dto.apiResponse.APIResponseEntityBuilder;
-import kr.co.naamk.naamkauthenticationapi.web.service.AdminAuthService;
+import kr.co.naamk.naamkauthenticationapi.web.service.admin.AdminAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;

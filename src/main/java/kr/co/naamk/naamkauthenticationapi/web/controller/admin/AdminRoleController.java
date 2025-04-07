@@ -1,29 +1,27 @@
-package kr.co.naamk.naamkauthenticationapi.web.controller;
+package kr.co.naamk.naamkauthenticationapi.web.controller.admin;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
-import kr.co.naamk.naamkauthenticationapi.web.dto.AdminMenuDto;
+import kr.co.naamk.naamkauthenticationapi.web.dto.admin.AdminRoleDto;
 import kr.co.naamk.naamkauthenticationapi.web.dto.apiResponse.APIResponseEntityBuilder;
-import kr.co.naamk.naamkauthenticationapi.web.service.AdminAuthService;
-import kr.co.naamk.naamkauthenticationapi.web.service.AdminMenuService;
+import kr.co.naamk.naamkauthenticationapi.web.service.admin.AdminAuthService;
+import kr.co.naamk.naamkauthenticationapi.web.service.admin.AdminRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
-@RequestMapping("/api/v1/menus")
+@RequestMapping("api/v1/roles")
 @RequiredArgsConstructor
-public class AdminMenuController {
+public class AdminRoleController {
 
-    private final AdminMenuService adminMenuService;
+    private final AdminRoleService adminRoleService;
     private final AdminAuthService adminAuthService;
 
-    @PostMapping(value="/menu", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object createMenu( HttpServletRequest request, @RequestBody AdminMenuDto.CreateRequest dto ) {
+    @PostMapping(value="/role", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object createRole( HttpServletRequest request, @RequestBody AdminRoleDto.CreateRequest dto ) {
 
-        AdminMenuDto result = adminMenuService.createMenu(dto);
+        AdminRoleDto result = adminRoleService.createRole( dto );
         adminAuthService.refreshAuthorities();
 
         return APIResponseEntityBuilder.create()
@@ -33,13 +31,10 @@ public class AdminMenuController {
                 .build();
     }
 
+    @PutMapping(value="/role")
+    public Object updateRole(HttpServletRequest request, @RequestBody AdminRoleDto.UpdateRequest dto ) {
 
-
-    @PutMapping(value="/menu", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object updateMenu( HttpServletRequest request,
-                              @RequestBody AdminMenuDto.UpdateRequest dto) {
-
-        AdminMenuDto result = adminMenuService.updateMenu(dto);
+        AdminRoleDto result = adminRoleService.updateRole( dto );
         adminAuthService.refreshAuthorities();
 
         return APIResponseEntityBuilder.create()
@@ -49,12 +44,11 @@ public class AdminMenuController {
                 .build();
     }
 
+    /// 역할에 따른 Access 수정 (perms, menus)
+    @PutMapping(value="/role-access", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object updateRoleAccess( HttpServletRequest request, @RequestBody AdminRoleDto.AccessRequest dto ) {
 
-
-    @DeleteMapping(value="/menu/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object deleteMenu( HttpServletRequest request, @PathVariable Integer id) {
-
-        Map<String, Boolean> result = adminMenuService.deleteMenu(id);
+        AdminRoleDto.AccessResponse result = adminRoleService.updateRoleAccess( dto );
         adminAuthService.refreshAuthorities();
 
         return APIResponseEntityBuilder.create()

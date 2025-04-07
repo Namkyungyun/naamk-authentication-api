@@ -1,7 +1,7 @@
-package kr.co.naamk.naamkauthenticationapi.mapstruct;
+package kr.co.naamk.naamkauthenticationapi.mapstruct.admin;
 
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminUsers;
-import kr.co.naamk.naamkauthenticationapi.web.dto.AdminUserDto;
+import kr.co.naamk.naamkauthenticationapi.web.dto.admin.AdminUserDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;

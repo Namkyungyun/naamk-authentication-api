@@ -1,4 +1,4 @@
-package kr.co.naamk.naamkauthenticationapi.web.service;
+package kr.co.naamk.naamkauthenticationapi.web.service.admin;
 
 import kr.co.naamk.naamkauthenticationapi.config.security.exception.SecurityException;
 import kr.co.naamk.naamkauthenticationapi.domain.admin.*;
@@ -11,8 +11,8 @@ import kr.co.naamk.naamkauthenticationapi.redis.repository.RedisTokenRepository;
 import kr.co.naamk.naamkauthenticationapi.utils.DateUtil;
 import kr.co.naamk.naamkauthenticationapi.utils.JwtUtil;
 import kr.co.naamk.naamkauthenticationapi.utils.SecurityUtil;
-import kr.co.naamk.naamkauthenticationapi.web.dto.AdminAuthDto;
-import kr.co.naamk.naamkauthenticationapi.web.repository.*;
+import kr.co.naamk.naamkauthenticationapi.web.dto.admin.AdminAuthDto;
+import kr.co.naamk.naamkauthenticationapi.web.repository.admin.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

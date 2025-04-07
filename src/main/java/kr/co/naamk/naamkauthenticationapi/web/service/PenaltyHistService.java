@@ -34,52 +34,61 @@ public class PenaltyHistService {
     public Page< PenaltyHistDto > findUserPenaltyHistListByUserId( Long linkedId, String type, Pageable pageable ) throws ServiceException {
 
         Long id = null;
-        if ( type.equals( PenaltyType.user.name() ) ) {
-            TbUsers user = userRepository.findById( linkedId )
-                    .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
-            id = user.getId();
-        } else if ( type.equals( PenaltyType.post.name() ) ) {
-            TbPost post = postRepository.findById( linkedId )
-                    .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "post not found" ) );
-            id = post.getId();
-        } else {
-            throw new ServiceException( ServiceMessageType.NOT_FOUND, "type not supported" );
-        }
+        PenaltyType penaltyType = PenaltyType.fromPenaltyName( type );
+
+        id = switch ( penaltyType ) {
+            case PenaltyType.user -> {
+                TbUsers user = userRepository.findById( linkedId )
+                        .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
+                yield user.getId();
+            }
+            case PenaltyType.post -> {
+                TbPost post = postRepository.findById( linkedId )
+                        .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "post not found" ) );
+                yield post.getId();
+            }
+            default -> throw new ServiceException( ServiceMessageType.NOT_FOUND, "penalty type not supported" );
+        };
 
         pageable = PageRequest.of( Math.max( pageable.getPageNumber(), 0 ), pageable.getPageSize(), pageable.getSort() );
-        return penaltyHistRepository.findPenaltyHistsByLinkedIdAndType( id, type, pageable );
+        return penaltyHistRepository.findPenaltyHistsByLinkedIdAndType( id, penaltyType.getName(), pageable );
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public PenaltyHistDto.CreateResponse saveUserPenalty( Long linkedId, String type, PenaltyHistDto.CreateRequest dto ) throws ServiceException {
+    public PenaltyHistDto.CreateResponse savePenalty( Long linkedId, String type, PenaltyHistDto.CreateRequest dto ) throws ServiceException {
         // check existing user or post id
         Long id = null;
         String username = null;
-        if ( type.equals( PenaltyType.user.name() ) ) {
-            TbUsers user = userRepository.findById( linkedId )
-                    .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
-            id = user.getId();
-            username = user.getUsername();
-        } else if ( type.equals( PenaltyType.post.name() ) ) {
-            TbPost post = postRepository.findById( linkedId )
-                    .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "post not found" ) );
-            TbUsers user = userRepository.findById( post.getUserId() )
-                    .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
+        PenaltyType penaltyType = PenaltyType.fromPenaltyName( type );
 
-            id = post.getId();
-            username = user.getUsername();
-        } else {
-            throw new ServiceException( ServiceMessageType.NOT_FOUND, "type not supported" );
+        switch ( penaltyType ) {
+            case PenaltyType.user:
+                TbUsers user = userRepository.findById( linkedId )
+                        .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
+                id = user.getId();
+                username = user.getUsername();
+                break;
+            case PenaltyType.post:
+                TbPost post = postRepository.findById( linkedId )
+                        .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "post not found" ) );
+                TbUsers postedUser = userRepository.findById( post.getUserId() )
+                        .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
+
+                id = post.getId();
+                username = postedUser.getUsername();
+                break;
+            default:
+                throw new ServiceException( ServiceMessageType.NOT_FOUND, "penalty type not supported" );
         }
 
-        // penalty create
+        // penalty 저장
         TbPenaltyHist entity = PenaltyHistMapper.INSTANCE.toEntity( dto );
         entity.setLinkedId( id );
-        entity.setType( type );
+        entity.setType( penaltyType.getName() );
 
         TbPenaltyHist savedEntity = penaltyHistRepository.save( entity );
 
-        // report update [접수처리 완료]
+        // report update [ 접수 -> 접수 처리 완료 ]
         List< TbReportsHist > uncompletedReports = reportHistRepository.findActiveReportsByLinkedIdAndType( linkedId, type );
         if ( !uncompletedReports.isEmpty() ) {
             uncompletedReports.forEach( el -> el.setIsActive( false ) );

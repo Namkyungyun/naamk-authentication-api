@@ -1,4 +1,4 @@
-package kr.co.naamk.naamkauthenticationapi.domain.type;
+package kr.co.naamk.naamkauthenticationapi.domain.type.admin;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

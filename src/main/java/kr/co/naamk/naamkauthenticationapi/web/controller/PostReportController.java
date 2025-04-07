@@ -57,7 +57,6 @@ public class PostReportController {
     }
 
 
-
     @PostMapping(value = "/report", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object createReport(HttpServletRequest request, @RequestBody PostReportDto.CreateRequest dto){
         Object result = postReportService.createPostReport( dto );

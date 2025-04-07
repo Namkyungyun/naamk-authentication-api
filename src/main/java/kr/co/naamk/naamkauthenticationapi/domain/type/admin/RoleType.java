@@ -1,4 +1,4 @@
-package kr.co.naamk.naamkauthenticationapi.domain.type;
+package kr.co.naamk.naamkauthenticationapi.domain.type.admin;
 
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;

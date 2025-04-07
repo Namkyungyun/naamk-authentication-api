@@ -1,6 +1,5 @@
 package kr.co.naamk.naamkauthenticationapi.domain.type;
 
-import com.querydsl.core.types.dsl.BooleanPath;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
 import lombok.AllArgsConstructor;
@@ -17,8 +16,7 @@ public enum PenaltyStatusType {
 
     private final Boolean statusValue;
     private final String statusName;
-
-    // roleName을 기반으로 RoleType 반환 메서드
+    
     public static PenaltyStatusType fromStatusValue(Boolean isNullOk,  Boolean statusValue) {
         if (statusValue == null) {
             return isNullOk? ok : empty;

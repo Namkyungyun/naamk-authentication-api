@@ -1,8 +1,7 @@
 package kr.co.naamk.naamkauthenticationapi.domain.type;
 
-import lombok.AllArgsConstructor;
+import kr.co.naamk.naamkauthenticationapi.domain.type.admin.RoleType;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.List;

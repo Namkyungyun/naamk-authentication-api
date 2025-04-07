@@ -2,7 +2,6 @@ package kr.co.naamk.naamkauthenticationapi.web.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kr.co.naamk.naamkauthenticationapi.domain.common.TbUsers;
-import kr.co.naamk.naamkauthenticationapi.domain.type.PenaltyType;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
 import kr.co.naamk.naamkauthenticationapi.redis.model.RedisNotificationEntity;
 import kr.co.naamk.naamkauthenticationapi.redis.type.NotificationType;
@@ -27,7 +26,7 @@ public class PenaltyHistController {
     private final RedisService redisService;
 
     @GetMapping(value = "/{type}/{linkedId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object getUserPenaltyHistByUserId( HttpServletRequest request,
+    public Object getPenaltyHistByLinkedIdAndType( HttpServletRequest request,
                                               @PathVariable(value="type") String type,
                                               @PathVariable(value = "linkedId") Long linkedId,
                                               Pageable pageable
@@ -43,12 +42,12 @@ public class PenaltyHistController {
     }
 
     @PostMapping(value="/{type}/{linkedId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object createUserPenaltyHist( HttpServletRequest request,
-                                         @PathVariable(value = "linkedId") Long linkedId,
+    public Object createPenaltyHist( HttpServletRequest request,
                                          @PathVariable(value="type") String type,
+                                         @PathVariable(value = "linkedId") Long linkedId,
                                          @RequestBody PenaltyHistDto.CreateRequest dto) {
         // penalty 처리
-        PenaltyHistDto.CreateResponse result = penaltyHistService.saveUserPenalty( linkedId, type, dto );
+        PenaltyHistDto.CreateResponse result = penaltyHistService.savePenalty( linkedId, type, dto );
 
         // 알림 전송
         Boolean isBlock = !dto.getIsActive(); // 제제 여부  [ isActive:true = 정상 | isActive:false = 차단 ]
@@ -61,6 +60,7 @@ public class PenaltyHistController {
                 .build();
     }
 
+    /// 레디스 저장 확인용
     @GetMapping(value="/notifications/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getPenaltyNotifications( HttpServletRequest request , @PathVariable("userId") Long userId) {
         // user 조회
@@ -73,7 +73,6 @@ public class PenaltyHistController {
                 .entity( result )
                 .resultMessage( ServiceMessageType.SUCCESS )
                 .build();
-
     }
 
 

@@ -1,15 +1,15 @@
-package kr.co.naamk.naamkauthenticationapi.web.service;
+package kr.co.naamk.naamkauthenticationapi.web.service.admin;
 
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminMenus;
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoleMenus;
 import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoles;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
-import kr.co.naamk.naamkauthenticationapi.mapstruct.AdminMenuMapper;
-import kr.co.naamk.naamkauthenticationapi.web.dto.AdminMenuDto;
-import kr.co.naamk.naamkauthenticationapi.web.repository.AdminMenuRepository;
-import kr.co.naamk.naamkauthenticationapi.web.repository.AdminRoleMenusRepository;
-import kr.co.naamk.naamkauthenticationapi.web.repository.AdminRoleRepository;
+import kr.co.naamk.naamkauthenticationapi.mapstruct.admin.AdminMenuMapper;
+import kr.co.naamk.naamkauthenticationapi.web.dto.admin.AdminMenuDto;
+import kr.co.naamk.naamkauthenticationapi.web.repository.admin.AdminMenuRepository;
+import kr.co.naamk.naamkauthenticationapi.web.repository.admin.AdminRoleMenusRepository;
+import kr.co.naamk.naamkauthenticationapi.web.repository.admin.AdminRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

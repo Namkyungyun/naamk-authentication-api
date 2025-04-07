@@ -1,4 +1,4 @@
-package kr.co.naamk.naamkauthenticationapi.web.dto;
+package kr.co.naamk.naamkauthenticationapi.web.dto.admin;
 
 import lombok.*;
 
