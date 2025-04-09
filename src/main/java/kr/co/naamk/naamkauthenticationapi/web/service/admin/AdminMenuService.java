@@ -1,31 +1,98 @@
 package kr.co.naamk.naamkauthenticationapi.web.service.admin;
 
-import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminMenus;
-import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoleMenus;
-import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminRoles;
+import kr.co.naamk.naamkauthenticationapi.domain.admin.*;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
 import kr.co.naamk.naamkauthenticationapi.mapstruct.admin.AdminMenuMapper;
+import kr.co.naamk.naamkauthenticationapi.redis.model.RedisRoleEntity;
+import kr.co.naamk.naamkauthenticationapi.redis.repository.RedisRoleRepository;
+import kr.co.naamk.naamkauthenticationapi.utils.SecurityUtil;
 import kr.co.naamk.naamkauthenticationapi.web.dto.admin.AdminMenuDto;
-import kr.co.naamk.naamkauthenticationapi.web.repository.admin.AdminMenuRepository;
-import kr.co.naamk.naamkauthenticationapi.web.repository.admin.AdminRoleMenusRepository;
-import kr.co.naamk.naamkauthenticationapi.web.repository.admin.AdminRoleRepository;
+import kr.co.naamk.naamkauthenticationapi.web.repository.admin.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
 public class AdminMenuService {
 
+    private final SecurityUtil securityUtil;
+    private final AdminUserRepository adminUserRepository;
     private final AdminMenuRepository adminMenuRepository;
     private final AdminRoleRepository adminRoleRepository;
     private final AdminRoleMenusRepository adminRoleMenusRepository;
+
+    private final RedisRoleRepository redisRoleRepository;
+
+    @Transactional(readOnly = true)
+    public List< AdminMenuDto.MenuTreeDto > getDisplayTreeByUserId() {
+
+        /// 레디스에 저장된 전체 권한 정보 ( role 기반의 permissions(crud), menus )
+        /// roleName, perms, menus
+        List<RedisRoleEntity> redisRoleAccess = StreamSupport
+                .stream(redisRoleRepository.findAll().spliterator(), false)
+                .toList();
+
+        /// 해당 유저의 모든 role 조회
+        List< String > userRoleNames = securityUtil.getCurrentUserRoles();
+
+
+        /// redisRoleAccess
+        List<RedisRoleEntity> userRoleAccess = redisRoleAccess.stream()
+                .filter( el -> userRoleNames.contains( el.getRoleName() ) )
+                .toList();
+
+        /// 접근 가능 메뉴추츨하기
+        List<String> accessMenus = userRoleAccess.stream()
+                .flatMap(el ->{ if(el.getMenus() != null) {
+                    return el.getMenus().stream();
+                }
+                    return Stream.empty();
+                })
+                .distinct()
+                .toList();
+
+
+        List< Map< String, Object > > flatMenuList = adminMenuRepository.nativeFindMenuTreeByMenuCodes( accessMenus );
+
+        // 2. MapStruct로 DTO 변환
+        List< AdminMenuDto.MenuTreeDto > flatDtos = flatMenuList.stream()
+                .map(AdminMenuMapper.INSTANCE::objToMenuTreeDTO)
+                .collect(Collectors.toList());
+        // 3. 트리 구조로 변환
+        return buildMenuTree(flatDtos);
+    }
+
+    private List< AdminMenuDto.MenuTreeDto > buildMenuTree( List< AdminMenuDto.MenuTreeDto > flatList) {
+        Map<Integer, AdminMenuDto.MenuTreeDto> menuMap = new HashMap<>();
+        List<AdminMenuDto.MenuTreeDto> rootList = new ArrayList<>();
+
+        // 먼저 map에 담기
+        for (AdminMenuDto.MenuTreeDto node : flatList) {
+            node.setSubmenus(new ArrayList<>()); // null 방지
+            menuMap.put(node.getId(), node);
+        }
+
+        // 실제 트리 구성
+        for (AdminMenuDto.MenuTreeDto node : flatList) {
+            if (node.getParentId() == null) {
+                rootList.add(node); // 루트 메뉴
+            } else {
+                AdminMenuDto.MenuTreeDto parent = menuMap.get(node.getParentId());
+                if (parent != null) {
+                    parent.getSubmenus().add(node); // 부모에 자식 추가
+                }
+            }
+        }
+
+        return rootList;
+    }
 
 
     @Transactional

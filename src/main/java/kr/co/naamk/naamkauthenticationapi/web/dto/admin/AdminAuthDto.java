@@ -1,5 +1,6 @@
 package kr.co.naamk.naamkauthenticationapi.web.dto.admin;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.sql.Timestamp;
@@ -18,8 +19,8 @@ public class AdminAuthDto {
     @Data
     @Builder
     public static class LoginResponse {
-        private Integer userId;
         private String accessToken;
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss", timezone = "Asia/Seoul")
         private Timestamp expiredAt;
     }
 

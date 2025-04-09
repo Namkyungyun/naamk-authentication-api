@@ -2,12 +2,14 @@ package kr.co.naamk.naamkauthenticationapi.utils;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
@@ -47,6 +49,16 @@ public class JwtUtil implements InitializingBean {
                 .expiration( getExpirationDate( ACCESS_EXPIRATION ) )
                 .signWith( ACCESS_SECRET_KEY, Jwts.SIG.HS256 ) // ✅ 최신 방식 적용
                 .compact();
+    }
+
+    /// request에서 accessToken가져오기
+    public String getJwtAccessTokenFromRequest( HttpServletRequest request ) {
+        String bearerToken = request.getHeader( JwtUtil.ACCESS_HEADER );
+        if ( StringUtils.hasText( bearerToken ) && bearerToken.startsWith( "Bearer " ) ) {
+            return bearerToken.substring( 7 );
+        }
+
+        return null;
     }
 
     ///  검증

@@ -21,7 +21,7 @@ public class TbAdminMenus extends AuditEntity {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Size(max = 10)
+    @Size(max = 20)
     @NotNull
     @Column(name = "code", unique = true, nullable = false, length = 10)
     @Comment( "메뉴 코드" )

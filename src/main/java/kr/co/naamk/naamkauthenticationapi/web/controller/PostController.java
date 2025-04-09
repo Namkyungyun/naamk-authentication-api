@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/post-management")
+@RequestMapping("/api/v1/posts")
 public class PostController {
 
     private final PostService postService;
@@ -29,7 +29,7 @@ public class PostController {
                 .build();
     }
 
-    @PostMapping(value = "/posts", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getUsers( HttpServletRequest request, @RequestBody PostDto.SearchRequest dto, Pageable pageable ) {
 
         Page< PostDto > result = postService.findPostList(dto, pageable);
@@ -41,7 +41,7 @@ public class PostController {
                 .build();
     }
 
-    @GetMapping(value="/posts/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value="/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getUserById(HttpServletRequest request, @PathVariable(value="postId") Long postId) {
 
         PostDto.PostDetailResponse result = postService.findPostById( postId );

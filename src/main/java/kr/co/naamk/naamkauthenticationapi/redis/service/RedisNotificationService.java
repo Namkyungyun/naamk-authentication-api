@@ -1,4 +1,4 @@
-package kr.co.naamk.naamkauthenticationapi.web.service;
+package kr.co.naamk.naamkauthenticationapi.redis.service;
 
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class RedisService {
+public class RedisNotificationService {
 
     public final long TIME_TO_LIVE_DAYS = 7 * 24 * 60 * 60 * 1000; // 일 * 시간 * 분 * 초 * 밀리 = 7일
     private final RedisNotificationRepository notificationRedisRepository;

@@ -2,6 +2,7 @@ package kr.co.naamk.naamkauthenticationapi.web.controller.admin;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
+import kr.co.naamk.naamkauthenticationapi.redis.service.RedisAccessService;
 import kr.co.naamk.naamkauthenticationapi.web.dto.admin.AdminRoleDto;
 import kr.co.naamk.naamkauthenticationapi.web.dto.apiResponse.APIResponseEntityBuilder;
 import kr.co.naamk.naamkauthenticationapi.web.service.admin.AdminAuthService;
@@ -17,12 +18,13 @@ public class AdminRoleController {
 
     private final AdminRoleService adminRoleService;
     private final AdminAuthService adminAuthService;
+    private final RedisAccessService redisAccessService;
 
     @PostMapping(value="/role", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object createRole( HttpServletRequest request, @RequestBody AdminRoleDto.CreateRequest dto ) {
 
         AdminRoleDto result = adminRoleService.createRole( dto );
-        adminAuthService.refreshAuthorities();
+        redisAccessService.refreshAuthorities();
 
         return APIResponseEntityBuilder.create()
                 .service( request )
@@ -35,7 +37,7 @@ public class AdminRoleController {
     public Object updateRole(HttpServletRequest request, @RequestBody AdminRoleDto.UpdateRequest dto ) {
 
         AdminRoleDto result = adminRoleService.updateRole( dto );
-        adminAuthService.refreshAuthorities();
+        redisAccessService.refreshAuthorities();
 
         return APIResponseEntityBuilder.create()
                 .service( request )
@@ -49,7 +51,7 @@ public class AdminRoleController {
     public Object updateRoleAccess( HttpServletRequest request, @RequestBody AdminRoleDto.AccessRequest dto ) {
 
         AdminRoleDto.AccessResponse result = adminRoleService.updateRoleAccess( dto );
-        adminAuthService.refreshAuthorities();
+        redisAccessService.refreshAuthorities();
 
         return APIResponseEntityBuilder.create()
                 .service( request )

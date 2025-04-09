@@ -1,6 +1,7 @@
 package kr.co.naamk.naamkauthenticationapi.web.controller.admin;
 
 import jakarta.servlet.http.HttpServletRequest;
+import kr.co.naamk.naamkauthenticationapi.domain.admin.TbAdminUserRoles;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
 import kr.co.naamk.naamkauthenticationapi.web.dto.admin.AdminUserDto;
 import kr.co.naamk.naamkauthenticationapi.web.dto.apiResponse.APIResponseEntityBuilder;
@@ -10,15 +11,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/admins")
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
     private final AdminAuthService adminAuthService;
 
-    @PostMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/admin", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object create( HttpServletRequest request, @RequestBody AdminUserDto.CreateRequest dto ) {
 
         AdminUserDto result = adminUserService.createUser( dto );
@@ -31,7 +34,7 @@ public class AdminUserController {
     }
 
 
-    @PutMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/admin", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object update( HttpServletRequest request, @RequestBody AdminUserDto.UpdateRequest dto ) {
 
         AdminUserDto result = adminUserService.updateUser( dto );
@@ -43,7 +46,7 @@ public class AdminUserController {
                 .build();
     }
 
-    @PutMapping(value="/user-access", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value="/admin-access", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object updateUserAccess(HttpServletRequest request, @RequestBody AdminUserDto.AccessRequest dto) {
 
         AdminUserDto.AccessResponse result = adminUserService.updateUserAccess( dto );
@@ -56,7 +59,19 @@ public class AdminUserController {
                 .build();
     }
 
-    @PostMapping(value="/user-password", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value="/admin/{id}/delegate-access", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object delegateInactiveRoleAccess(HttpServletRequest request, @PathVariable(value="id") Integer id) {
+
+        List< TbAdminUserRoles > result = adminUserService.delegateAllInactiveUserAccess( id );
+
+        return APIResponseEntityBuilder.create()
+                .service( request )
+                .entity( result )
+                .resultMessage( ServiceMessageType.SUCCESS )
+                .build();
+    }
+
+    @PostMapping(value="/admin-password", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object updatePassword(HttpServletRequest request, @RequestBody AdminUserDto.PasswordRequest dto) {
 
         AdminUserDto.PasswordResponse result = adminUserService.updatePassword( dto );

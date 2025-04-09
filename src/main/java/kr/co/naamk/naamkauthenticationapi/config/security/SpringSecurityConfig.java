@@ -1,6 +1,7 @@
 package kr.co.naamk.naamkauthenticationapi.config.security;
 
 import kr.co.naamk.naamkauthenticationapi.config.security.exception.SecurityException;
+import kr.co.naamk.naamkauthenticationapi.config.security.filter.AccessControlFilter;
 import kr.co.naamk.naamkauthenticationapi.config.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,7 @@ public class SpringSecurityConfig {
 
     private final SecurityException securityException;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AccessControlFilter accessControlFilter;
 
 
     @Bean
@@ -62,13 +64,14 @@ public class SpringSecurityConfig {
         );
 
         http.authorizeHttpRequests( req -> req
-//                .requestMatchers( "api/v1/login", "api/v1/auth/**" ).permitAll()
-                        .anyRequest().permitAll()
-//                .anyRequest().authenticated()
+                .requestMatchers( "api/v1/login","api/v1/auth/**", "api/v1/menus/**" ).permitAll()
+//                        .anyRequest().permitAll()
+                .anyRequest().authenticated()
         );
 
         // filter
         http.addFilterBefore( jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class );
+        http.addFilterAfter( accessControlFilter, UsernamePasswordAuthenticationFilter.class );
 
 
         return http.build();

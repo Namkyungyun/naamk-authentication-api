@@ -8,7 +8,7 @@ import kr.co.naamk.naamkauthenticationapi.redis.type.NotificationType;
 import kr.co.naamk.naamkauthenticationapi.web.dto.PenaltyHistDto;
 import kr.co.naamk.naamkauthenticationapi.web.dto.apiResponse.APIResponseEntityBuilder;
 import kr.co.naamk.naamkauthenticationapi.web.service.PenaltyHistService;
-import kr.co.naamk.naamkauthenticationapi.web.service.RedisService;
+import kr.co.naamk.naamkauthenticationapi.redis.service.RedisNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +23,7 @@ import java.util.List;
 public class PenaltyHistController {
 
     private final PenaltyHistService penaltyHistService;
-    private final RedisService redisService;
+    private final RedisNotificationService redisNotificationService;
 
     @GetMapping(value = "/{type}/{linkedId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getPenaltyHistByLinkedIdAndType( HttpServletRequest request,
@@ -51,7 +51,7 @@ public class PenaltyHistController {
 
         // 알림 전송
         Boolean isBlock = !dto.getIsActive(); // 제제 여부  [ isActive:true = 정상 | isActive:false = 차단 ]
-        redisService.saveNotificationPenalty( result.getUsername(), NotificationType.fromTypeName( type ), isBlock, linkedId );
+        redisNotificationService.saveNotificationPenalty( result.getUsername(), NotificationType.fromTypeName( type ), isBlock, linkedId );
 
         return APIResponseEntityBuilder.create()
                 .service( request )
@@ -66,7 +66,7 @@ public class PenaltyHistController {
         // user 조회
         TbUsers user = penaltyHistService.getUserById( userId );
         // redis 조회
-        List< RedisNotificationEntity > result = redisService.searchNotification( user.getUsername() );
+        List< RedisNotificationEntity > result = redisNotificationService.searchNotification( user.getUsername() );
 
         return APIResponseEntityBuilder.create()
                 .service( request )

@@ -41,7 +41,11 @@ public class DateTimeUtil {
     public static String getLocalDateTimeMils() {
         return getLocalNow(DATETIMEMILSFORMAT);
     }
-    
+
+    public static String getLocalDateTimeMilsNano() {
+        return getLocalNow(DATETIMEMILSFORMATNANO);
+    }
+
     
     private static String getLocalNow(String format) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);

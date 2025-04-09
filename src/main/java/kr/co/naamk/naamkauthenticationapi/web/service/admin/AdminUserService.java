@@ -19,9 +19,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Array;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -109,20 +111,59 @@ public class AdminUserService {
         Timestamp expiredDate = dateUtil.getExpiredAt(entity.getChangedAt());
 
         return AdminUserMapper.INSTANCE.toDto( user, expiredDate, authorityNames );
-
-
     }
 
-    @Transactional
-    public AdminUserDto.AccessResponse updateUserAccess( AdminUserDto.AccessRequest dto ) {
-        AdminUserDto.AccessResponse result = AdminUserDto.AccessResponse.builder().build();
+    // 어드민에게 비활성화되어있는 모든 역할을 insert
+    @Transactional(rollbackFor = Exception.class)
+    public List<TbAdminUserRoles> delegateAllInactiveUserAccess(Integer id) {
+        TbAdminUsers admin = adminUserRepository.findById( id )
+                .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "not found admin" ) );
 
+
+        List< TbAdminRoles > allRoles = adminRoleRepository.findAll();
+
+        // 사용자에게 부여된 RoleIds
+        List< Integer > roleIds = adminUserRolesRepository.findByUserId( id ).stream()
+                .map( TbAdminUserRoles::getRole )
+                .map( TbAdminRoles::getId )
+                .toList();
+
+        List<TbAdminUserRoles> newAdminRoles = new ArrayList<>();
+        for(TbAdminRoles role : allRoles) {
+            boolean contains = roleIds.contains( role.getId() );
+            if(contains) {
+                continue;
+            }
+
+            TbAdminUserRoles adminRoles = new TbAdminUserRoles();
+            adminRoles.setRole(role);
+            adminRoles.setUser( admin );
+            adminRoles.setIsActive( false );
+
+            newAdminRoles.add( adminRoles );
+        }
+
+        if(!newAdminRoles.isEmpty()) {
+            List< TbAdminUserRoles > adminUserRoles = adminUserRolesRepository.saveAll( newAdminRoles );
+            newAdminRoles = adminUserRoles;
+        }
+
+
+        return newAdminRoles;
+    }
+
+
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public AdminUserDto.AccessResponse updateUserAccess( AdminUserDto.AccessRequest dto ) {
         /// user roles
         if ( dto.getRoles().isEmpty() ) {
             throw new ServiceException( ServiceMessageType.EMPTY_REQUEST );
         }
 
         List< TbAdminUserRoles > entities = adminUserRolesRepository.findByUserId( dto.getId() );
+
         List< Integer > ids = entities.stream().map( TbAdminUserRoles::getId ).toList();
         TbAdminUsers user = entities.getFirst().getUser();
 
@@ -143,11 +184,12 @@ public class AdminUserService {
                         .build()
                 ).toList();
 
-        result.setRoles( savedList );
-        result.setId( user.getId() );
-        result.setUsername( user.getUsername() );
 
-        return result;
+        return AdminUserDto.AccessResponse.builder()
+                .roles( savedList )
+                .id( user.getId() )
+                .username( user.getUsername() )
+                .build();
     }
 
 

@@ -14,6 +14,7 @@ import kr.co.naamk.naamkauthenticationapi.utils.JwtUtil;
 import kr.co.naamk.naamkauthenticationapi.utils.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String accessToken = "";
 
         try {
-            accessToken = getJwtAccessTokenFromRequest( request );
+            accessToken = jwtUtil.getJwtAccessTokenFromRequest( request );
 
             if ( StringUtils.hasText( accessToken ) ) {
                 // Access Token 검증
@@ -60,9 +61,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authenticationToken = securityUtil.generateJWTAuthentication( request, username, authorities );
                 SecurityContextHolder.getContext().setAuthentication( authenticationToken );
 
+                filterChain.doFilter( request, response );
+                return;
             }
 
-            filterChain.doFilter( request, response );
+            boolean isExcludeUrl = securityUtil.containsTokenExcludeUrl( request.getRequestURI() );
+            if(isExcludeUrl) {
+                filterChain.doFilter( request, response );
+                return;
+            }
+
+            throw new AuthenticationServiceException( "not found access token" );
+
 
         } catch ( Exception e ) {
             // JWTUtil에서 온거라면 메시지로 ServiceMessageType의 코드값.
@@ -102,15 +112,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-
-    private String getJwtAccessTokenFromRequest( HttpServletRequest request ) {
-        String bearerToken = request.getHeader( JwtUtil.ACCESS_HEADER );
-        if ( StringUtils.hasText( bearerToken ) && bearerToken.startsWith( "Bearer " ) ) {
-            return bearerToken.substring( 7 );
-        }
-
-        return null;
-    }
 
     private void validateTokenInRedis(String username, String accessToken)  {
         if(username.isBlank() || accessToken.isBlank()) {

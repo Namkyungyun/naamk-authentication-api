@@ -47,7 +47,7 @@ public class SecurityException {
     public void unAuthentication( HttpServletRequest request, HttpServletResponse response) throws IOException {
         ObjectMapper om = new ObjectMapper();
         Object responseDto = APIResponseEntityBuilder.create().service(request)
-                .resultMessage(ServiceMessageType.SC_UNAUTHORIZED)
+                .resultMessage(ServiceMessageType.SC_FORBIDDEN)
                 .build();
 
         String responseBody = om.writeValueAsString(responseDto);

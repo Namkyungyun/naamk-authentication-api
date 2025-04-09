@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user-management")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private final UserService userService;
@@ -29,7 +29,7 @@ public class UserController {
                 .build();
     }
 
-    @PostMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getUsers( HttpServletRequest request, @RequestBody UserDto.SearchRequest dto, Pageable pageable ) {
 
         Page< UserDto > result = userService.findUserList(dto, pageable);
@@ -41,7 +41,7 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping(value="/users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value="/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getUserById(HttpServletRequest request, @PathVariable(value="userId") Long userId) {
 
         UserDto.UserDetailResponse result = userService.findUserById( userId );

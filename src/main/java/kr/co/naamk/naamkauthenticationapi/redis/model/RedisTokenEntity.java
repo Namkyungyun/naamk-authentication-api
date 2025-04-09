@@ -21,6 +21,10 @@ public class RedisTokenEntity {
     @Indexed
     private String accessToken;
 
+    private String name;
+
+    private String loginAt;
+
     @TimeToLive(unit = TimeUnit.HOURS)
     private Long timeToLive; // 1일
 }

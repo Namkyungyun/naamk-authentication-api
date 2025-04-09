@@ -1,13 +1,11 @@
 package kr.co.naamk.naamkauthenticationapi.web.service.admin;
 
-import kr.co.naamk.naamkauthenticationapi.config.security.exception.SecurityException;
 import kr.co.naamk.naamkauthenticationapi.domain.admin.*;
 import kr.co.naamk.naamkauthenticationapi.exception.ServiceException;
 import kr.co.naamk.naamkauthenticationapi.exception.type.ServiceMessageType;
-import kr.co.naamk.naamkauthenticationapi.redis.model.RedisRoleEntity;
 import kr.co.naamk.naamkauthenticationapi.redis.model.RedisTokenEntity;
-import kr.co.naamk.naamkauthenticationapi.redis.repository.RedisRoleRepository;
 import kr.co.naamk.naamkauthenticationapi.redis.repository.RedisTokenRepository;
+import kr.co.naamk.naamkauthenticationapi.utils.DateTimeUtil;
 import kr.co.naamk.naamkauthenticationapi.utils.DateUtil;
 import kr.co.naamk.naamkauthenticationapi.utils.JwtUtil;
 import kr.co.naamk.naamkauthenticationapi.utils.SecurityUtil;
@@ -17,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
@@ -42,17 +38,9 @@ public class AdminAuthService implements UserDetailsService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     private final AdminUserRepository adminUserRepository;
-    private final AdminRoleRepository adminRoleRepository;
-
     private final AdminUserRolesRepository adminUserRolesRepository;
-    private final AdminRoleMenusRepository adminRoleMenusRepository;
-    private final AdminRolePermsRepository adminRolePermsRepository;
 
     private final RedisTokenRepository redisTokenRepository;
-    private final RedisRoleRepository redisRoleRepository;
-
-    public final long AUTH_EXPIRATION = 8 * 60 * 60 * 1000; // // hour * minute * second * milli =>  8시간
-    private final SecurityException securityException;
 
 
     @Override
@@ -78,7 +66,7 @@ public class AdminAuthService implements UserDetailsService {
      * @param dto
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public AdminAuthDto.LoginResponse login( AdminAuthDto.LoginRequest dto ) {
         TbAdminUsers user = adminUserRepository.findByUsername( dto.getUsername() ) // username = login id
                 .orElseThrow( ( ) -> new ServiceException( ServiceMessageType.NOT_FOUND, "user not found" ) );
@@ -120,6 +108,9 @@ public class AdminAuthService implements UserDetailsService {
         /// expiredAt
         Timestamp expiredAt = dateUtil.getExpiredAt( user.getChangedAt() );
 
+        // loginAt
+        String loginAt = DateTimeUtil.getLocalDateTimeMilsNano();
+
         /// db 저장 (유저 정보)
         user.setFailCnt( 0 );
         adminUserRepository.save( user );
@@ -127,10 +118,12 @@ public class AdminAuthService implements UserDetailsService {
 
         /// redis 저장 (유저 access token 값)
         redisTokenRepository.save( RedisTokenEntity.builder()
-                        .username( username )
-                        .accessToken( accessToken )
-                        .timeToLive( JwtUtil.ACCESS_EXPIRATION )
-                        .build() );
+                .username( username )
+                .name( user.getName() )
+                .accessToken( accessToken )
+                .loginAt( loginAt )
+                .timeToLive( JwtUtil.ACCESS_EXPIRATION )
+                .build() );
 
 
         /// security context 저장
@@ -138,90 +131,24 @@ public class AdminAuthService implements UserDetailsService {
 
 
         return AdminAuthDto.LoginResponse.builder()
-                .userId( user.getId() )
                 .accessToken( accessToken )
                 .expiredAt( expiredAt )
                 .build();
     }
 
 
+    @Transactional(rollbackFor = Exception.class)
     public void logout( String username ) {
-        RedisTokenEntity entity = redisTokenRepository.findByUsername( username );
-        if ( entity != null ) {
-            redisTokenRepository.delete( entity );
-        }
 
-        User principal = (User) securityUtil.getAuthentication().getPrincipal();
-        if ( principal.getUsername().equals( username ) ) {
+        // 현재 로그인한 유저를 로그아웃
+        if ( username == null ) {
+            username = securityUtil.getCurrentUserName();
             securityUtil.clearContextHolder();
         }
 
-    }
-
-
-    @Transactional(readOnly = true)
-    public Iterable< RedisRoleEntity > getRedisRoleAuthorities( ) {
-        return redisRoleRepository.findAll();
-    }
-
-
-    /// Save role info in Redis (roleName, menus, perms)
-    @Transactional
-    public void refreshAuthorities( ) {
-        try {
-
-            List< TbAdminRoles > activeRoles = adminRoleRepository.findByIsActiveTrue();
-            List< TbAdminRolePerms > activePerms = adminRolePermsRepository.findByIsActiveTrue();
-            List< TbAdminRoleMenus > activeMenus = adminRoleMenusRepository.findByIsActiveTrue().stream()
-                    .filter( el -> el.getMenu().getIsActive() )
-                    .toList();
-
-
-            Iterable< RedisRoleEntity > redisAll = redisRoleRepository.findAll();
-            List< RedisRoleEntity > redisDeleteList = new ArrayList<>( StreamSupport.stream( redisAll.spliterator(), false ).toList() );
-
-            List< RedisRoleEntity > redisSaveList = new ArrayList<>();
-            for ( TbAdminRoles role : activeRoles ) {
-                String roleName = role.getName();
-
-                /// active false 목록을 레디스에서 삭제하기 위한 전처리
-                Optional< RedisRoleEntity > updateElement = redisDeleteList.stream()
-                        .filter( el -> el.getRoleName().equals( roleName ) )
-                        .findFirst();
-                updateElement.ifPresent( redisDeleteList::remove );
-
-
-                /// menu
-                List< String > menus = activeMenus.stream()
-                        .filter( roleMenu -> Objects.equals( roleMenu.getRole().getId(), role.getId() ) )
-                        .map( roleMenu -> roleMenu.getMenu().getCode() )
-                        .toList();
-
-
-                /// perms
-                List< String > perms = activePerms.stream()
-                        .filter( rolePerm -> Objects.equals( rolePerm.getRole().getId(), role.getId() ) )
-                        .map( TbAdminRolePerms::getPermCd )
-                        .toList();
-
-
-                /// 저장
-                redisSaveList.add( RedisRoleEntity.builder()
-                        .roleName( roleName )
-                        .perms( perms )
-                        .menus( menus )
-                        .timeToLive( AUTH_EXPIRATION )
-                        .build() );
-
-            }
-
-            redisRoleRepository.deleteAll( redisDeleteList );
-            redisRoleRepository.saveAll( redisSaveList );
-
-        } catch ( Exception e ) {
-            log.error( ServiceMessageType.ERROR_CACHE.getServiceMessage(), e );
-
-            throw new ServiceException( ServiceMessageType.ERROR_CACHE );
+        RedisTokenEntity entity = redisTokenRepository.findByUsername( username );
+        if ( entity != null ) {
+            redisTokenRepository.delete( entity );
         }
     }
 
@@ -233,7 +160,8 @@ public class AdminAuthService implements UserDetailsService {
      * @return
      */
     private List< GrantedAuthority > getAuthorities( Integer userId ) {
-        List< TbAdminUserRoles > roles = adminUserRolesRepository.findByUserId( userId );
+        List< TbAdminUserRoles > roles = adminUserRolesRepository.findByUserId( userId ).stream()
+                .filter( TbAdminUserRoles::getIsActive ).toList();
         List< GrantedAuthority > authorities = new ArrayList<>();
 
         if ( !roles.isEmpty() ) {
