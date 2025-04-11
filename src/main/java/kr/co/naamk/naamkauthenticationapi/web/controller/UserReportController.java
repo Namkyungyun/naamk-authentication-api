@@ -20,8 +20,8 @@ public class UserReportController {
 
     private final UserReportService userReportService;
 
-    @GetMapping(value="/search-options", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object getSearch(HttpServletRequest request) {
+    @GetMapping(value = "/search-options", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object getSearch( HttpServletRequest request ) {
         UserReportDto.SearchOption result = userReportService.getSearch();
 
         return APIResponseEntityBuilder.create()
@@ -33,7 +33,7 @@ public class UserReportController {
 
     @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getUsers( HttpServletRequest request, @RequestBody UserReportDto.SearchRequest dto, Pageable pageable ) {
-        Page< UserReportDto > result = userReportService.findAllUserReport(dto, pageable);
+        Page< UserReportDto > result = userReportService.findAllUserReport( dto, pageable );
 
         return APIResponseEntityBuilder.create()
                 .service( request )
@@ -43,8 +43,8 @@ public class UserReportController {
     }
 
 
-    @GetMapping(value="/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object getUserById(HttpServletRequest request, @PathVariable(value="userId") Long userId) {
+    @GetMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object getUserById( HttpServletRequest request, @PathVariable(value = "userId") Long userId ) {
 
         UserReportDto.UserDetailResponse result = userReportService.findLatestUserReport( userId );
 
@@ -55,12 +55,12 @@ public class UserReportController {
                 .build();
     }
 
-    @GetMapping(value="/{userId}/report-hist", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object getUserReportHistById(HttpServletRequest request,
-                                        @PathVariable(value="userId") Long userId,
-                                        Pageable pageable) {
+    @GetMapping(value = "/{userId}/report-hist", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object getUserReportHistById( HttpServletRequest request,
+                                         @PathVariable(value = "userId") Long userId,
+                                         Pageable pageable ) {
 
-        Map<String, Object> result = userReportService.findUserReportHist( userId , pageable);
+        Map< String, Object > result = userReportService.findUserReportHist( userId, pageable );
 
         return APIResponseEntityBuilder.create()
                 .service( request )
@@ -72,7 +72,7 @@ public class UserReportController {
 
     /// test용
     @PostMapping(value = "/report", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object createReport(HttpServletRequest request, @RequestBody UserReportDto.CreateRequest dto){
+    public Object createReport( HttpServletRequest request, @RequestBody UserReportDto.CreateRequest dto ) {
         Object result = userReportService.createUserReport( dto );
         return APIResponseEntityBuilder.create()
                 .service( request )

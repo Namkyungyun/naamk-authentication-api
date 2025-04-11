@@ -36,7 +36,8 @@ public class SecurityUtil {
     final List<String> ACCESS_EXCLUDE_URLS = List.of(
             "/api/v1/auth/me",
             "/api/v1/logout",
-            "/api/v1/menus/display-menutree"
+            "/api/v1/menus/display-menutree",
+            "/api/v1/penalty-hist/"
             // 여기에 제외할 URI 추가
     );
 
@@ -119,6 +120,8 @@ public class SecurityUtil {
 
         if (authentication != null && authentication.isAuthenticated()) {
             username = authentication.getName();
+        } else {
+            username = "system";
         }
 
         return username;

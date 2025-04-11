@@ -8,9 +8,9 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum ReportStatusType {
+    unComplete( true, "접수" ),
     complete( false, "처리완료" ),
-    unComplete( true, "접수" );
-
+;
     private final Boolean statusValue;
     private final String statusName;
 
