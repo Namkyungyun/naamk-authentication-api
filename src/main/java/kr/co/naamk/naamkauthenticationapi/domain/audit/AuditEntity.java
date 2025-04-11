@@ -35,10 +35,10 @@ public abstract class AuditEntity {
 
     @CreatedBy
     @Column(name = "created_by", length = 50)
-    private String createdBy = "system";
+    private String createdBy;
 
     @LastModifiedBy
     @Column(name = "updated_by", length = 50)
     @Comment("수정자")
-    private String updatedBy = "system";
+    private String updatedBy;
 }

@@ -26,6 +26,6 @@ public abstract class AuditOnlyCreateEntity {
 
     @CreatedBy
     @Column(name = "created_by", length = 50)
-    private String createdBy = "system";
+    private String createdBy;
 
 }
